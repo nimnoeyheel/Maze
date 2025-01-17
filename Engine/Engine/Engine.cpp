@@ -283,8 +283,8 @@ void Engine::Clear()
 
 void Engine::Draw()
 {
-	// 화면 지우기 - 맵이 변하지 않아서 Clear 안해도 됨.
-	//Clear();
+	// 화면 지우기
+	Clear();
 
 	// 레벨 그리기
 	if (mainLevel) mainLevel->Draw();

@@ -29,35 +29,18 @@ void Player::Update(float deltaTime)
 	// 상하좌우 이동
 	if (Engine::Get().GetKey(VK_LEFT))
 	{
-		refLevel->MoveConsole(-10, 0);
-
-		/*if (refLevel->CanPlayerMove(Vector2(position.x - 1, position.y)))
-		{
-			position.x -= 1;
-		}*/
+		refLevel->MoveConsole(-5, 0);
 	}
 	if (Engine::Get().GetKey(VK_RIGHT))
 	{
-		refLevel->MoveConsole(10,0);
-		/*if (refLevel->CanPlayerMove(Vector2(position.x + 1, position.y)))
-		{
-			position.x += 1;
-		}*/
+		refLevel->MoveConsole(5,0);
 	}
 	if (Engine::Get().GetKey(VK_UP))
 	{
-		refLevel->MoveConsole(0, -10);
-		/*if (refLevel->CanPlayerMove(Vector2(position.x, position.y - 1)))
-		{
-			position.y -= 1;
-		}*/
+		refLevel->MoveConsole(0, -5);
 	}
 	if (Engine::Get().GetKey(VK_DOWN))
 	{
-		refLevel->MoveConsole(0, 10);
-		/*if (refLevel->CanPlayerMove(Vector2(position.x, position.y + 1)))
-		{
-			position.y += 1;
-		}*/
+		refLevel->MoveConsole(0, 5);
 	}
 }

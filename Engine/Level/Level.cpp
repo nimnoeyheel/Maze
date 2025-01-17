@@ -113,11 +113,6 @@ void Level::Update(float deltaTime)
 
 		actor->Update(deltaTime);
 	}
-	
-	/*for (int i = 0; i < actors.size(); ++i)
-	{
-		actors[i]->Update(deltaTime);
-	}*/
 }
 
 void Level::Draw()
@@ -130,9 +125,4 @@ void Level::Draw()
 
 		actor->Draw();
 	}
-
-	/*for (int i = 0; i < actors.size(); ++i)
-	{
-		actors[i]->Draw();
-	}*/
 }
