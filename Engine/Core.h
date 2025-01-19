@@ -16,14 +16,22 @@ enum class Color : unsigned short
 	White = Red + Green + Blue,
 };
 
-// 콘솔 색상 설정 함수.
-inline void SetColor(Color color)
+// 커서의 종류를 설정할 때 사용할 열거형.
+enum class CursorType
 {
-	SetConsoleTextAttribute(
-		GetStdHandle(STD_OUTPUT_HANDLE),
-		(int)color
-	);
-}
+	NoCursor,
+	SolidCursor,
+	NormalCursor
+};
+
+// 콘솔 색상 설정 함수.
+//inline void SetColor(Color color)
+//{
+//	SetConsoleTextAttribute(
+//		GetStdHandle(STD_OUTPUT_HANDLE), 
+//		(int)color
+//	);
+//}
 
 // 메모리 삭제 함수.
 template<typename T>
@@ -42,18 +50,18 @@ void Log(const char* format, T&&... args)
 {
 	char buffer[1024];
 	snprintf(buffer, 1024, format, args ...);
-	std::cout << buffer /*<< "\n"*/;
+	std::cout << buffer;
 }
 
-// 랜덤 함수
+// 랜덤 함수.
 inline int Random(int min, int max)
 {
-	// 차이 구하기
+	// 차이 구하기.
 	int diff = (max - min) + 1;
 	return ((diff * rand()) / (RAND_MAX + 1)) + min;
 }
 
-// min~max 사이의 랜덤 값을 반환해주는 함수
+// min~max 사이의 랜덤 값을 반환해주는 함수.
 inline float RandomPercent(float min, float max)
 {
 	float random = (float)(rand() / (float)RAND_MAX);

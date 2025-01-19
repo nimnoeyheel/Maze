@@ -4,7 +4,7 @@
 #include "Actor/DrawableActor.h"
 #include <vector>
 
-#pragma region Å¬·¡½º Àü¹æ¼±¾ğ
+#pragma region í´ë˜ìŠ¤ ì „ë°©ì„ ì–¸
 class DrawableActor;
 class Player;
 #pragma endregion
@@ -16,37 +16,39 @@ class GameLevel : public Level
 public:
 	GameLevel(const std::string& fileName, int startX, int startY, int width = 350, int height = 350);
 
-	// ¾÷µ¥ÀÌÆ® ÇÔ¼ö
+	// ì—…ë°ì´íŠ¸ í•¨ìˆ˜
 	virtual void Update(float deltaTime) override;
 
-	// ·¹º§ÀÇ ±×¸®±â ÇÔ¼ö
+	// ë ˆë²¨ì˜ ê·¸ë¦¬ê¸° í•¨ìˆ˜
 	virtual void Draw() override;
 
-	// ÇÃ·¹ÀÌ¾î°¡ ÀÌµ¿ÀÌ °¡´ÉÇÑÁö È®ÀÎÇÏ´Â ÇÔ¼ö
+	// í”Œë ˆì´ì–´ê°€ ì´ë™ì´ ê°€ëŠ¥í•œì§€ í™•ì¸í•˜ëŠ” í•¨ìˆ˜
 	bool CanPlayerMove(const Vector2& position);
 
-	// ÄÜ¼ÖÃ¢ ÀÌµ¿ ÇÔ¼ö
-	void MoveConsole(int dx, int dy);
+	// ì½˜ì†”ì°½ ì´ë™ í•¨ìˆ˜
+	void MoveConsole(int dx,int dy);
 
+	// ì½˜ì†”ì°½ ìœ„ì¹˜ ë° í¬ê¸° ì„¤ì • í•¨ìˆ˜
+	void SetConsoleWindow(int x,int y,int width,int height);
 
 private:
 
-	int mapWidth;  // ¸Ê ³Êºñ
-	int mapHeight; // ¸Ê ³ôÀÌ
+	int mapWidth;  // ë§µ ë„ˆë¹„
+	int mapHeight; // ë§µ ë†’ì´
 
-	HWND console;  // ÄÜ¼Ö ÇÚµé
-	int consoleX;  // ÄÜ¼Ö X ÁÂÇ¥
-	int consoleY;  // ÄÜ¼Ö Y ÁÂÇ¥
-	int consoleWidth;  // ÄÜ¼Ö ³Êºñ
-	int consoleHeight; // ÄÜ¼Ö ³ôÀÌ
+	HWND console;  // ì½˜ì†” í•¸ë“¤
+	int consoleX;  // ì½˜ì†” X ì¢Œí‘œ
+	int consoleY;  // ì½˜ì†” Y ì¢Œí‘œ
+	int consoleWidth;  // ì½˜ì†” ë„ˆë¹„
+	int consoleHeight; // ì½˜ì†” ë†’ì´
 
-	// ¾×ÅÍ µ¥ÀÌÅÍ¸¦ ÀúÀåÇÏ´Â 2D ÄÁÅ×ÀÌ³Ê
+	// ì•¡í„° ë°ì´í„°ë¥¼ ì €ì¥í•˜ëŠ” 2D ì»¨í…Œì´ë„ˆ
 	std::vector<std::vector<Actor*>> mapData;
 
-	// ÇÃ·¹ÀÌ¾î ¾×ÅÍ
+	// í”Œë ˆì´ì–´ ì•¡í„°
 	Player* player = nullptr;
 
-	// °ÔÀÓ Å¬¸®¾î º¯¼ö
+	// ê²Œì„ í´ë¦¬ì–´ ë³€ìˆ˜
 	bool isGameClear = false;
 
 };

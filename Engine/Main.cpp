@@ -1,8 +1,8 @@
 #include "PreCompiledHeader.h"
+
 #include <iostream>
 
 #include "Engine/Engine.h"
-
 
 int main()
 {
@@ -10,5 +10,4 @@ int main()
 
 	Engine engine;
 	engine.Run();
-
 }

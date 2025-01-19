@@ -1,5 +1,6 @@
 #include "PreCompiledHeader.h"
 #include "Actor.h"
+
 #include "Core.h"
 
 Actor::Actor()
@@ -11,7 +12,7 @@ Actor::~Actor()
 {
 }
 
-void Actor::Update(float deltaTime)
+void Actor::Update(float delatTime)
 {
 }
 

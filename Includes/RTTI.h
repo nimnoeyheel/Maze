@@ -1,8 +1,8 @@
 #pragma once
 
-// 작성자 필터링 용
-// @refactor: 경고를 일부러 무시 시켰기 때문에 문제가 된다면 고쳐야함.
-#pragma warning(disable : 4172)
+// 작성자: 장세윤.
+// - 경고를 일부러 무시 시켰기 때문에 문제가 된다면 고쳐야 함.
+#pragma warning (disable : 4172)
 
 #include "Core.h"
 

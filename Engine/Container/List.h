@@ -1,6 +1,6 @@
 #pragma once
 
-#pragma warning(disable : 4251)
+#pragma warning (disable : 4251)
 
 #include <iostream>
 
@@ -11,7 +11,6 @@ public:
 	List()
 		: capacity(2)
 	{
-		//ReAllocate(2);
 		data = new T[capacity];
 		memset(data, 0, sizeof(T) * capacity);
 	}
@@ -48,16 +47,19 @@ public:
 
 	void Erase(int index)
 	{
-		// 예외 처리
-		if (index < 0 || index >= size) __debugbreak();
-
-		// 삭제한 데이터의 인덱스 다음 위치를 한 칸 앞으로 모두 이동
-		for (int i = index; i < size - 1; ++i)
+		// 예외 처리.
+		if (index < 0 || index >= size)
 		{
-			data[i] = std::move(data[i + 1]);
+			__debugbreak();
 		}
 
-		// 삭제 후 크기 줄이기
+		// 삭제한 데이터의 인덱스 다음 위치를 한칸 앞으로 모두 이동.
+		for (int ix = index; ix < size - 1; ++ix)
+		{
+			data[ix] = std::move(data[ix + 1]);
+		}
+
+		// 삭제 후 크기 줄이기.
 		--size;
 	}
 

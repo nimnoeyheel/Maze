@@ -4,30 +4,32 @@
 
 class ENGINE_API DrawableActor : public Actor
 {
-	// RTTI
+	// RTTI.
 	RTTI_DECLARATIONS(DrawableActor, Actor)
 
 public:
 	DrawableActor(const char* image = "");
-	//virtual ~DrawableActor() = default;
 	virtual ~DrawableActor();
 
 	virtual void Draw() override;
 	virtual void SetPosition(const Vector2& newPosition) override;
 
-	// Ãæµ¹ È®ÀÎ ÇÔ¼ö
+	// ì¶©ëŒ í™•ì¸ í•¨ìˆ˜.
 	bool Intersect(const DrawableActor& other);
 
-	// Getter
-	inline int Width() const { return width; };
+	// Getter.
+	inline int Width() const { return width; }
+	virtual const char* GetSymbol() const { return image; }
+	virtual Color GetColor() const { return color; }
 
 protected:
-	// È­¸é¿¡ ±×¸± ¹®ÀÚ °ª
-	char* image; // ¹®ÀÚ¿­·Î º¯°æ *
 
-	// ³Êºñ(¹®ÀÚ¿­ ±æÀÌ)
+	// í™”ë©´ì— ê·¸ë¦´ ë¬¸ì ê°’.
+	char* image;
+
+	// ë„ˆë¹„(ë¬¸ìì—´ ê¸¸ì´).
 	int width = 0;
 
-	// »ö»ó °ª
+	// ìƒ‰ìƒ ê°’.
 	Color color = Color::White;
 };

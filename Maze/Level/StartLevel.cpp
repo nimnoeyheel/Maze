@@ -5,9 +5,6 @@
 
 StartLevel::StartLevel()
 {
-	// ÄÜ¼Ö Ã¢ Å©±â¿Í À§Ä¡ ¼³Á¤
-	SetConsoleWindowToCenter(800, 500);
-
 	menuItems.PushBack(new MenuItem("Start Game", []() { Game::Get().LoadStage(1); }));
 	menuItems.PushBack(new MenuItem("Quit Game", []() { Game::Get().QuitGame(); }));
 	length = menuItems.Size();
@@ -47,42 +44,15 @@ void StartLevel::Draw()
 {
 	Super::Draw();
 
-	Engine::Get().SetCursorPosition(0, 0);
+	// í…ìŠ¤íŠ¸ ì¶œë ¥ ì‹œì‘ ìœ„ì¹˜
+	int startX = 0,startY = 0;
 
-	SetColor(unselectedColor);
-	Log("Escape The Maze\n\n");
+	// "Escape The Maze" í—¤ë” ì¶œë ¥
+	Engine::Get().Draw(Vector2(startX,startY),"Escape The Maze",unselectedColor);
 
-	for (int ix = 0; ix < length; ++ix)
-	{
-		SetColor(ix == currentIndex ? selectedColor : unselectedColor);
-		Log("%s\n", menuItems[ix]->menuText);
+	// ë©”ë‰´ í•­ëª© ì¶œë ¥
+	for(int ix = 0; ix < length; ++ix) {
+		Color textColor = (ix == currentIndex) ? selectedColor : unselectedColor;
+		Engine::Get().Draw(Vector2(startX,startY + ix + 2),menuItems[ix]->menuText,textColor);
 	}
-}
-
-void StartLevel::SetConsoleWindowToCenter(int pixelWidth, int pixelHeight)
-{
-	// »õ·Î¿î ÄÜ¼Ö Ã¢ »ı¼º
-	AllocConsole();
-
-	// ÄÜ¼Ö ÇÚµé °¡Á®¿À±â
-	HWND consoleWindow = GetConsoleWindow();
-	if (consoleWindow == NULL) return;
-
-	// È­¸é Å©±â °¡Á®¿À±â
-	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
-	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
-
-	// ÄÜ¼Ö Ã¢ Å©±â ¼³Á¤
-	COORD bufferSize = { (SHORT)pixelWidth, (SHORT)pixelHeight };
-	SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE), bufferSize);
-
-	SMALL_RECT rect = { 0, 0, (SHORT)pixelWidth - 1, (SHORT)pixelHeight - 1 };
-	SetConsoleWindowInfo(GetStdHandle(STD_OUTPUT_HANDLE), TRUE, &rect);
-
-	// Áß¾Ó À§Ä¡ °è»ê
-	int x = (screenWidth - pixelWidth) / 2;
-	int y = (screenHeight - pixelHeight) / 2;
-
-	// Ã¢ À§Ä¡ ÀÌµ¿
-	MoveWindow(consoleWindow, x, y, pixelWidth, pixelHeight, TRUE);
 }

@@ -1,5 +1,3 @@
-#define NOMINMAX
-
 #include "GameLevel.h"
 #include "Engine/Engine.h"
 #include "Actor/Player.h"
@@ -14,18 +12,12 @@
 GameLevel::GameLevel(const std::string& fileName, int startX, int startY, int width, int height)
 	: consoleX(startX), consoleY(startY), consoleWidth(width), consoleHeight(height)
 {
-	// ÄÜ¼Ö ÇÚµé °¡Á®¿À±â
-	console = GetConsoleWindow();
-	if (console)
-	{
-		// ÄÜ¼Ö Ã¢ À§Ä¡ ¹× Å©±â ¼³Á¤
-		MoveWindow(console, consoleX, consoleY, consoleWidth, consoleHeight, TRUE);
-	}
+	SetConsoleWindow(consoleX,consoleY, consoleWidth,consoleHeight);
 
-	// Ä¿¼­ °¨Ãß±â
+	// ì»¤ì„œ ê°ì¶”ê¸°
 	Engine::Get().SetCursorType(CursorType::NoCursor);
 
-	// ¸Ê ÆÄÀÏ ÀĞ±â
+	// ë§µ íŒŒì¼ ì½ê¸°
 	std::ifstream file(fileName);
 	if (!file.is_open())
 	{
@@ -33,18 +25,18 @@ GameLevel::GameLevel(const std::string& fileName, int startX, int startY, int wi
 		__debugbreak();
 	}
 
-	int yPosition = 0; // y ÁÂÇ¥ ÃÊ±âÈ­
+	int yPosition = 0; // y ì¢Œí‘œ ì´ˆê¸°í™”
 	std::string line;
 
-	// ÆÄÀÏ ÁÙ ´ÜÀ§·Î ÀĞ±â
+	// íŒŒì¼ ì¤„ ë‹¨ìœ„ë¡œ ì½ê¸°
 	while (std::getline(file, line))
 	{
-		std::vector<Actor*> row; // °¢ ÁÙÀÇ ¾×ÅÍ ÀúÀå
+		std::vector<Actor*> row; // ê° ì¤„ì˜ ì•¡í„° ì €ì¥
 		for (int xPosition = 0; xPosition < static_cast<int>(line.size()); ++xPosition)
 		{
 			char mapChar = line[xPosition];
 
-			// ¹®ÀÚ¿¡ µû¶ó ¾×ÅÍ »ı¼º
+			// ë¬¸ìì— ë”°ë¼ ì•¡í„° ìƒì„±
 			if (mapChar == '1') {
 				row.push_back(new Wall(Vector2(xPosition, yPosition)));
 			}
@@ -62,14 +54,14 @@ GameLevel::GameLevel(const std::string& fileName, int startX, int startY, int wi
 				//consoleY = std::max(0, yPosition - consoleHeight / 2);
 			}
 			else {
-				row.push_back(nullptr); // ºó °ø°£
+				row.push_back(nullptr); // ë¹ˆ ê³µê°„
 			}
 		}
 		mapData.push_back(row);
-		++yPosition; // ´ÙÀ½ ÁÙ·Î ÀÌµ¿
+		++yPosition; // ë‹¤ìŒ ì¤„ë¡œ ì´ë™
 	}
 
-	// ¸Ê Å©±â ¼³Á¤
+	// ë§µ í¬ê¸° ì„¤ì •
 	mapHeight = static_cast<int>(mapData.size());
 	mapWidth = mapData.empty() ? 0 : static_cast<int>(mapData[0].size());
 
@@ -80,30 +72,30 @@ void GameLevel::Update(float deltaTime)
 {
 	Super::Update(deltaTime);
 
-	// ÇÃ·¹ÀÌ¾î ¾÷µ¥ÀÌÆ®
+	// í”Œë ˆì´ì–´ ì—…ë°ì´íŠ¸
 	if (player)
 	{
 		player->Update(deltaTime);
 	}
 
-	// °ÔÀÓÀÌ Å¬¸®¾î µÆÀ¸¸é °ÔÀÓ Á¾·á Ã³¸®
+	// ê²Œì„ì´ í´ë¦¬ì–´ ëìœ¼ë©´ ê²Œì„ ì¢…ë£Œ ì²˜ë¦¬
 	if (isGameClear)
 	{
-		// Å¸ÀÌ¸Ó Å¬·¡½ºÀÇ °´Ã¼·Î ÄÚµå Á¤¸®
+		// íƒ€ì´ë¨¸ í´ë˜ìŠ¤ì˜ ê°ì²´ë¡œ ì½”ë“œ ì •ë¦¬
 		static Timer timer(0.1);
 		timer.Update(deltaTime);
 		if (!timer.IsTimeOut()) return;
 
-		// Ä¿¼­ ÀÌµ¿
-		Engine::Get().SetCursorPosition(0, Engine::Get().ScreenSize().y);
+		// ì»¤ì„œ ì´ë™
+		//Engine::Get().SetCursorPosition(0, Engine::Get().ScreenSize().y);
 
-		// ¸Ş¼¼Áö Ãâ·Â
+		// ë©”ì„¸ì§€ ì¶œë ¥
 		Log("Game Clear!\n");
 
-		// ¾²·¹µå Á¤Áö
+		// ì“°ë ˆë“œ ì •ì§€
 		Sleep(2000);
 
-		// °ÔÀÓ Á¾·á Ã³¸®
+		// ê²Œì„ ì¢…ë£Œ ì²˜ë¦¬
 		Engine::Get().QuitGame();
 	}
 
@@ -111,164 +103,42 @@ void GameLevel::Update(float deltaTime)
 
 void GameLevel::Draw()
 {
-	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
-	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+	// ë§µ í¬ê¸°ì™€ ìŠ¤í¬ë¦° ë¹„ìœ¨ ê³„ì‚°
+	//float scaleX = static_cast<float>(consoleWidth) / mapWidth;
+	//float scaleY = static_cast<float>(consoleHeight) / mapHeight;
 
-	float scaleX = static_cast<float>(screenWidth) / mapWidth;  // °¡·Î ºñÀ²
-	float scaleY = static_cast<float>(screenHeight) / mapHeight; // ¼¼·Î ºñÀ²
-
-	// ·»´õ¸µ ½ÃÀÛ
+	// í™”ë©´ì— ë³´ì¼ ë¶€ë¶„ë§Œ ë°± ë²„í¼ì— ë Œë”ë§
 	for (int y = 0; y < consoleHeight; ++y) {
-		// mapDataÀÇ y ÀÎµ¦½º °è»ê
-		int mapY = static_cast<int>(consoleY + y * scaleY);
-		if (mapY < 0 || mapY >= mapHeight) continue;  // mapData ¹üÀ§ ÃÊ°ú ½Ã ¹«½Ã
+		int mapY = consoleY + y; // ë§µì˜ Y ì¢Œí‘œ ê³„ì‚°
+		if (mapY < 0 || mapY >= mapHeight) continue;  // mapData ë²”ìœ„ ì´ˆê³¼ ì‹œ ë¬´ì‹œ
 
 		for (int x = 0; x < consoleWidth; ++x) {
-			// mapDataÀÇ x ÀÎµ¦½º °è»ê
-			int mapX = static_cast<int>(consoleX + x * scaleX);
-			if (mapX < 0 || mapX >= mapWidth) continue;  // mapData ¹üÀ§ ÃÊ°ú ½Ã ¹«½Ã
+			int mapX = consoleX + x; // ë§µì˜ X ì¢Œí‘œ ê³„ì‚°
+			if (mapX < 0 || mapX >= mapWidth) continue;  // mapData ë²”ìœ„ ì´ˆê³¼ ì‹œ ë¬´ì‹œ
 
-			// mapData¿¡¼­ ÇØ´ç À§Ä¡ÀÇ Actor °¡Á®¿À±â
-			Actor* actor = mapData[mapY][mapX];
-			if (actor) {
-				// ÄÜ¼Ö¿¡ ·»´õ¸µ
-				//Engine::Get().SetCursorPosition(x, y);
-				actor->Draw();
+			// ë§µ ë°ì´í„°ì—ì„œ Actor ê°€ì ¸ì˜¤ê¸°
+			DrawableActor* actor = dynamic_cast<DrawableActor*>(mapData[mapY][mapX]);
+			if(actor) {
+				// Actorì˜ ì‹¬ë³¼ê³¼ ìƒ‰ìƒì„ ë°± ë²„í¼ì— ì“°ê¸°
+				Engine::Get().Draw(Vector2(x,y),actor->GetSymbol(),actor->GetColor());
 			}
 		}
 	}
 
-	//for (int y = 0; y < mapHeight; ++y) {
-	//	for (int x = 0; x < mapWidth; ++x) {
-	//		// È­¸é»óÀÇ ·»´õ¸µ ÁÂÇ¥ °è»ê
-	//		int renderX = static_cast<int>((x - consoleX) * scaleX);
-	//		int renderY = static_cast<int>((y - consoleY) * scaleY);
-
-	//		// È­¸é ³»¿¡ Æ÷ÇÔµÈ °æ¿ì¿¡¸¸ ·»´õ¸µ
-	//		if (renderX >= 0 && renderX < consoleWidth &&
-	//			renderY >= 0 && renderY < consoleHeight) {
-	//			Actor* actor = mapData[y][x];
-	//			if (actor) {
-	//				actor->Draw();
-	//			}
-	//		}
-	//	}
-	//}
-
-	// ÄÜ¼ÖÃ¢ ¹üÀ§ ³»ÀÇ ¸Ê(¾×ÅÍ)¸¸ ·»´õ¸µ
-	//for (int y = 0; y < consoleHeight; ++y) {
-	//	int mapY = consoleY + y;
-	//	if (mapY >= mapHeight || mapY < 0) break; // ¸Ê °æ°è °Ë»ç
-
-	//	for (int x = 0; x < consoleWidth; ++x) {
-	//		int mapX = consoleX + x;
-	//		if (mapX >= mapWidth || mapX < 0) break; // ¸Ê °æ°è °Ë»ç
-
-	//		Actor* actor = mapData[mapY][mapX];
-	//		if (actor)
-	//		{
-	//			actor->Draw();
-	//		}
-	//	}
-	//}
-
-	//for (int y = 0; y < mapHeight; ++y) {
-	//	for (int x = 0; x < mapWidth; ++x) {
-	//		int renderY = y - consoleY;
-	//		int renderX = x - consoleX;
-
-	//		// È­¸é ³»¿¡ Æ÷ÇÔµÈ °æ¿ì¿¡¸¸ Ãâ·Â
-	//		if (renderX >= 0 && renderX < mapWidth &&
-	//			renderY >= 0 && renderY < mapHeight) {
-	//			// ½ÇÁ¦ ·»´õ¸µ ¼öÇà
-	//			Actor* actor = mapData[renderY][renderX];
-	//			if (actor)
-	//			{
-	//				actor->Draw();
-	//			}
-	//		}
-	//	}
-	//}
-
-	// ÇÃ·¹ÀÌ¾î À§Ä¡ Áß¾Ó¿¡ °íÁ¤
-	if (player)
+	// í”Œë ˆì´ì–´ ìœ„ì¹˜ ì¤‘ì•™ì— ê³ ì •
+	/*if (player)
 	{
 		int playerX = consoleWidth / 2;
 		int playerY = consoleHeight / 2;
 		player->SetPosition(Vector2(playerX, playerY));
 		player->Draw();
-	}
-
-#pragma region ¾×ÅÍ Ãæµ¹ ½Ã ·»´õ Ã³¸®
-	// ¸Ê ±×¸®±â.
-	//for (auto* actor : map)
-	//{
-	//	// ÇÃ·¹ÀÌ¾î À§Ä¡ È®ÀÎ
-	//	if (actor->Position() == player->Position())
-	//	{
-	//		continue;
-	//	}
-
-	//	// ¹Ú½º À§Ä¡ È®ÀÎ
-	//	bool shouldDraw = true;
-	//	/*for (auto* box : boxes)
-	//	{
-	//		if (actor->Position() == box->Position())
-	//		{
-	//			shouldDraw = false;
-	//			break;
-	//		}
-	//	}*/
-
-	//	// ¸Ê ¾×ÅÍ ±×¸®±â
-	//	if (shouldDraw)
-	//	{
-	//		actor->Draw();
-	//	}
-	//}
-
-	////// Å¸ÄÏ ±×¸®±â
-	////for (auto* target : targets)
-	////{
-	////	// ÇÃ·¹ÀÌ¾î À§Ä¡ È®ÀÎ
-	////	if (target->Position() == player->Position())
-	////	{
-	////		continue;
-	////	}
-
-	////	// ¹Ú½º À§Ä¡ È®ÀÎ
-	////	bool shouldDraw = true;
-	////	for (auto* box : boxes)
-	////	{
-	////		if (target->Position() == box->Position())
-	////		{
-	////			shouldDraw = false;
-	////			break;
-	////		}
-	////	}
-
-	////	// Å¸ÄÏ ¾×ÅÍ ±×¸®±â
-	////	if (shouldDraw)
-	////	{
-	////		target->Draw();
-	////	}
-	////}
-
-	////// ¹Ú½º ±×¸®±â
-	////for (auto* box : boxes)
-	////{
-	////	box->Draw();
-	////}
-
-	//// ÇÃ·¹ÀÌ¾î ±×¸®±â
-	//player->Draw();
-#pragma endregion
+	}*/
 
 }
 
 bool GameLevel::CanPlayerMove(const Vector2& position)
 {
-	// °ÔÀÓÀÌ Å¬¸®¾îµÈ °æ¿ì ¹Ù·Î Á¾·á
+	// ê²Œì„ì´ í´ë¦¬ì–´ëœ ê²½ìš° ë°”ë¡œ ì¢…ë£Œ
 	if (isGameClear) return false;
 
 
@@ -278,14 +148,93 @@ void GameLevel::MoveConsole(int dx, int dy)
 {
 	consoleX += dx;
 	consoleY += dy;
-	int screenWidth = GetSystemMetrics(SM_CXSCREEN) - consoleX / 4;
-	int screenHeight = GetSystemMetrics(SM_CYSCREEN) - consoleY / 2;
+
+	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 
 	if (consoleX < 0) consoleX = 0;
 	if (consoleY < 0) consoleY = 0;
-	if (consoleX > screenWidth) consoleX = screenWidth;
-	if (consoleY > screenHeight) consoleY = screenHeight;
 
-	MoveWindow(console, consoleX, consoleY, consoleWidth, consoleHeight, TRUE);
+	if(consoleX + consoleWidth > screenWidth) consoleX = screenWidth - consoleWidth;
+	if(consoleY + consoleHeight > screenHeight) consoleY = screenHeight - consoleHeight;
+
+	// ì½˜ì†” ì°½ ì´ë™
+	HWND consoleWindow = GetConsoleWindow();
+	if(consoleWindow == NULL) return;
+	MoveWindow(consoleWindow,consoleX,consoleY,consoleWidth,consoleHeight,TRUE);
 }
 
+void GameLevel::SetConsoleWindow(int x,int y,int width,int height)
+{
+	HWND consoleWindow = GetConsoleWindow();
+	if(consoleWindow == NULL) return;
+
+	// ì½˜ì†” í°íŠ¸ í¬ê¸° ì¬ì„¤ì •ìœ¼ë¡œ ì‹œì‘
+	CONSOLE_FONT_INFOEX cfi;
+	cfi.cbSize = sizeof(cfi);
+	cfi.nFont = 0;
+	cfi.dwFontSize.X = 8;
+	cfi.dwFontSize.Y = 16;
+	cfi.FontFamily = FF_DONTCARE;
+	cfi.FontWeight = FW_NORMAL;
+	wcscpy_s(cfi.FaceName,L"Terminal");
+	SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE),FALSE,&cfi);
+
+	// ë²„í¼ í¬ê¸° ê³„ì‚°
+	int bufferWidth = width / cfi.dwFontSize.X;
+	int bufferHeight = height / cfi.dwFontSize.Y;
+
+	// screenSize ì—…ë°ì´íŠ¸
+	Engine::Get().ScreenSize() = Vector2(bufferWidth,bufferHeight);
+
+	// ë²„í¼ í¬ê¸° ì„¤ì •
+	COORD bufferSize = {(SHORT)bufferWidth,(SHORT)bufferHeight};
+	SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE),bufferSize);
+
+	// ì°½ í¬ê¸° ì„¤ì • - ë²„í¼ì™€ ë™ì¼í•˜ê²Œ
+	SMALL_RECT windowRect = {0,0,(SHORT)bufferWidth - 1,(SHORT)bufferHeight - 1};
+	SetConsoleWindowInfo(GetStdHandle(STD_OUTPUT_HANDLE),TRUE,&windowRect);
+
+	// ì°½ í¬ê¸° ë° ìœ„ì¹˜ ì„¤ì • - ì‹¤ì œ í”½ì…€ í¬ê¸°ë¡œ
+	Sleep(50);  // ì ì‹œ ëŒ€ê¸°í•˜ì—¬ ì´ì „ ì„¤ì •ì´ ì ìš©ë˜ë„ë¡ í•¨
+
+	// ì‹¤ì œ ì°½ í¬ê¸°ë¥¼ ì„¤ì •í•  ë•ŒëŠ” ìœˆë„ìš° í…Œë‘ë¦¬ ë“±ì„ ê³ ë ¤
+	RECT rect;
+	GetWindowRect(consoleWindow,&rect);
+	int borderWidth = GetSystemMetrics(SM_CXFRAME) * 2;
+	int borderHeight = GetSystemMetrics(SM_CYFRAME) * 2 + GetSystemMetrics(SM_CYCAPTION);
+	int actualWidth = width + borderWidth;
+	int actualHeight = height + borderHeight;
+
+	MoveWindow(consoleWindow,x,y,actualWidth,actualHeight,TRUE);
+	Sleep(50);  // ì„¤ì •ì´ ì•ˆì •í™”ë  ì‹œê°„ì„ ì¤Œ
+	
+	//HWND consoleWindow = GetConsoleWindow();
+	//if(consoleWindow == NULL) return;
+
+	//// screenSize ì—…ë°ì´íŠ¸
+	//Vector2 newScreenSize(width / 8,height / 16);
+	//Engine::Get().ScreenSize() = newScreenSize;
+
+	//// ë²„í¼ í¬ê¸°ë¥¼ ìƒˆë¡œìš´ ì°½ í¬ê¸°ì™€ ì¼ì¹˜ì‹œí‚´
+	//COORD bufferSize = {(SHORT)newScreenSize.x,(SHORT)newScreenSize.y};
+	//SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE),bufferSize);
+
+	//// ì°½ í¬ê¸°ë„ ë™ì¼í•˜ê²Œ ì„¤ì •
+	//SMALL_RECT windowRect = {0,0,(SHORT)newScreenSize.x - 1,(SHORT)newScreenSize.y - 1};
+	//SetConsoleWindowInfo(GetStdHandle(STD_OUTPUT_HANDLE),TRUE,&windowRect);
+
+	//// Sleepì„ ì¶”ê°€í•˜ì—¬ ì½˜ì†” ì„¤ì •ì´ ì•ˆì •í™”ë  ì‹œê°„ì„ ì¤Œ
+	//Sleep(100);
+	//MoveWindow(consoleWindow,x,y,width,height,TRUE);
+	//Sleep(100);
+
+	// ì—”ì§„ì˜ screenSizeë„ í•¨ê»˜ ì—…ë°ì´íŠ¸
+	//Engine::Get().ScreenSize() = Vector2(width/8,height/16);
+
+	// ë²„í¼ ì¬ì´ˆê¸°í™”
+	//Engine::Get().InitializeScreenBuffers();
+
+	// ì½˜ì†” í¬ê¸° ë³€ê²½
+	//Engine::Get().ResizeConsole(x,y,width,height);
+}

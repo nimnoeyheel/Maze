@@ -1,219 +1,212 @@
 #include "PreCompiledHeader.h"
+
 #include "Engine.h"
 #include <Windows.h>
 #include <iostream>
-#include <Level/Level.h>
-#include <Actor/Actor.h>
-#include <ctime>
 
-// ½ºÅÂÆ½ º¯¼ö ÃÊ±âÈ­
+#include "Level/Level.h"
+#include "Actor/Actor.h"
+
+#include <time.h>
+
+#include "Render/ScreenBuffer.h"
+
+// ì½˜ì†” ì°½ ë©”ì‹œì§€ ì½œë°± í•¨ìˆ˜.
+BOOL WINAPI MessageProcessor(DWORD message)
+{
+	switch (message)
+	{
+	case CTRL_CLOSE_EVENT:
+		Engine::Get().QuitGame();
+		return true;
+
+	default:
+		return false;
+	}
+}
+
+// ìŠ¤íƒœí‹± ë³€ìˆ˜ ì´ˆê¸°í™”.
 Engine* Engine::instance = nullptr;
 
 Engine::Engine()
-	: quit(false)
-	, mainLevel(nullptr)
-	, screenSize(40, 25)
+	: quit(false), mainLevel(nullptr), screenSize(0,0)
 {
-	// ·£´ı ½Ãµå ¼³Á¤
+	// ëœë¤ ì‹œë“œ ì„¤ì •.
 	srand((unsigned int)time(nullptr));
 
-	// ½Ì±ÛÅæ °´Ã¼ ¼³Á¤
+	// ì‹±ê¸€í†¤ ê°ì²´ ì„¤ì •.
 	instance = this;
 
-	// ±âº» Å¸ÄÏ ÇÁ·¹ÀÓ ¼Óµµ ¼³Á¤
-	SetTargetFrameRate(60);
+	// ê¸°ë³¸ íƒ€ê²Ÿ í”„ë ˆì„ ì†ë„ ì„¤ì •.
+	SetTargetFrameRate(60.0f);
 
-	// È­¸é Áö¿ï ¶§ »ç¿ëÇÒ ¹öÆÛ ÃÊ±âÈ­
-	// 1. ¹öÆÛ Å©±â ÇÒ´ç
-	emptyStringBuffer = new char[(screenSize.x + 1) * (screenSize.y + 1)];
+	// ì½˜ì†” ì°½ ì´ˆê¸°í™” (í¬ê¸°ì™€ ìœ„ì¹˜ ì„¤ì •)
+	InitializeConsole(800,500);
 
-	// ¹öÆÛ µ¤¾î¾²±â
-	memset(emptyStringBuffer, ' ', (screenSize.x + 1) * (screenSize.y + 1));
+	// í™”ë©´ ë²„í¼ ì´ˆê¸°í™”.
+	InitializeScreenBuffers();
 
-	// 2. °ª ÇÒ´ç
-	for (int y = 0; y < screenSize.y; ++y)
-	{
-		//for (int x = 0; x < screenSize.x; ++x)
-		//{
-		//	// ÀÎµ¦½º °è»ê ÀßÇÏ±â
-		//	emptyStringBuffer[(y * (screenSize.x + 1)) + x] = ' ';
-		//}
-		// °¢ ÁÙ ³¡¿¡ °³Çà ¹®ÀÚ Ãß°¡
-		emptyStringBuffer[(y * (screenSize.x + 1)) + screenSize.x] = '\n';
-	}
-	// ¸¶Áö¸·¿¡ ³Î ¹®ÀÚ Ãß°¡
-	emptyStringBuffer[(screenSize.x + 1) * screenSize.y] = '\0';
+	// ìŠ¤ì™‘ ë²„í¼.
+	Present();
 
-	// µğ¹ö±ë
-#if _DEBUG
-    char buffer[2048];
-    strcpy_s(buffer, 2048, emptyStringBuffer);
-#endif
+	// ì½˜ì†” ì°½ ì´ë²¤íŠ¸ ì½œë°± í•¨ìˆ˜ ë“±ë¡.
+	SetConsoleCtrlHandler(MessageProcessor, true);
 }
 
 Engine::~Engine()
 {
-	// ¸ŞÀÎ ·¹º§ ¸Ş¸ğ¸® ÇØÁ¦
-	if (mainLevel) delete mainLevel;
+	// ë©”ì¸ ë ˆë²¨ ë©”ëª¨ë¦¬ í•´ì œ.
+	if (mainLevel != nullptr)
+	{
+		delete mainLevel;
+	}
 
-	// Å¬¸®¾î ¹öÆÛ »èÁ¦
-	delete[] emptyStringBuffer;
+	// í´ë¦¬ì–´ ë²„í¼ ì‚­ì œ.
+	delete[] imageBuffer;
+
+	// í™”ë©´ ë²„í¼ ì‚­ì œ.
+	delete renderTargets[0];
+	delete renderTargets[1];
 }
 
-void Engine::Run() // UE Tick
+void Engine::Run()
 {
-	// ½ÃÀÛ Å¸ÀÓ ½ºÅÆÇÁ ÀúÀå
+	// ì‹œì‘ íƒ€ì„ ìŠ¤íƒ¬í”„ ì €ì¥.
+	// timeGetTime í•¨ìˆ˜ëŠ” ë°€ë¦¬ì„¸ì»¨ë“œ(1/1000ì´ˆ) ë‹¨ìœ„.
 	//unsigned long currentTime = timeGetTime();
 	//unsigned long previousTime = 0;
 
-	// CPU ½Ã°è »ç¿ë(ÇÏµå¿ş¾î)
-	// ½Ã½ºÅÛ ½Ã°è -> °íÇØ»óµµ Ä«¿îÅÍ (1Ãµ¸¸)
-	// ¸ŞÀÎº¸µå¿¡ ½Ã°è°¡ ÀÖÀ½
+	// CPU ì‹œê³„ ì‚¬ìš©.
+	// ì‹œìŠ¤í…œ ì‹œê³„ -> ê³ í•´ìƒë„ ì¹´ìš´í„°. (10000000).
+	// ë©”ì¸ë³´ë“œì— ì‹œê³„ê°€ ìˆìŒ.
 	LARGE_INTEGER frequency;
 	QueryPerformanceFrequency(&frequency);
+
 	//std::cout << "Frequency: " << frequency.QuadPart << "\n";
 
-	// ½ÃÀÛ ½Ã°£ ¹× ÀÌÀü ½Ã°£À» À§ÇÑ º¯¼ö
+	// ì‹œì‘ ì‹œê°„ ë° ì´ì „ ì‹œê°„ì„ ìœ„í•œ ë³€ìˆ˜.
 	LARGE_INTEGER time;
-	QueryPerformanceCounter(&time); // == timeGetTime();
+	QueryPerformanceCounter(&time);
 
-	// int64_t == __int64
 	int64_t currentTime = time.QuadPart;
 	int64_t previousTime = currentTime;
 
-	// ÇÁ·¹ÀÓ Á¦ÇÑ
-	//float targetFrameRate = 90;
+	// í”„ë ˆì„ ì œí•œ.
+	//float targetFrameRate = 90.0f;
 
-	// ÇÑ ÇÁ·¹ÀÓ ½Ã°£ °è»ê
-	//float targetOneFrameTime = 1 / targetFrameRate;
+	// í•œ í”„ë ˆì„ ì‹œê°„ ê³„ì‚°.
+	//float targetOneFrameTime = 1.0f / targetFrameRate;
 
-	// Game-Loop
+	// Game-Loop.
 	while (true)
 	{
-		// Á¾·á Á¶°Ç
-		if (quit) break;
+		// ì¢…ë£Œ ì¡°ê±´.
+		if (quit)
+		{
+			break;
+		}
 
-		// ÇöÀç ÇÁ·¹ÀÓ ½Ã°£ ÀúÀå
-		// Time = timeGetTime();
+		// í˜„ì¬ í”„ë ˆì„ ì‹œê°„ ì €ì¥.
+		//time = timeGetTime();
 		QueryPerformanceCounter(&time);
 		currentTime = time.QuadPart;
 
-		// ÇÁ·¹ÀÓ ½Ã°£ °è»ê
+		// í”„ë ˆì„ ì‹œê°„ ê³„ì‚°.
 		float deltaTime = static_cast<float>(currentTime - previousTime) /
 			static_cast<float>(frequency.QuadPart);
 
-		// ÇÑ ÇÁ·¹ÀÓ ½Ã°£ °è»ê
-		//float targetOneFrameTime = 1 / targetFrameRate;
+		// í•œ í”„ë ˆì„ ì‹œê°„ ê³„ì‚°.
+		//float targetOneFrameTime = 1.0f / targetFrameRate;
 
-		// ÇÁ·¹ÀÓ È®ÀÎ
+		// í”„ë ˆì„ í™•ì¸.
 		if (deltaTime >= targetOneFrameTime)
 		{
-			// ÀÔ·Â Ã³¸® (ÇöÀç Å°ÀÇ ´­¸² »óÅÂ È®ÀÎ)
+			// ì…ë ¥ ì²˜ë¦¬ (í˜„ì¬ í‚¤ì˜ ëˆŒë¦¼ ìƒíƒœ í™•ì¸).
 			ProcessInput();
 
-			// ¾÷µ¥ÀÌÆ® °¡´ÉÇÑ »óÅÂ¿¡¼­¸¸ ÇÁ·¹ÀÓ ¾÷µ¥ÀÌÆ® Ã³¸®
+			// ì—…ë°ì´íŠ¸ ê°€ëŠ¥í•œ ìƒíƒœì—ì„œë§Œ í”„ë ˆì„ ì—…ë°ì´íŠ¸ ì²˜ë¦¬.
 			if (shouldUpdate)
 			{
 				Update(deltaTime);
 				Draw();
 			}
 
-			// Å° »óÅÂ ÀúÀå
-			SavePreiviouseKeyStates();
+			// í‚¤ ìƒíƒœ ì €ì¥.
+			SavePreviouseKeyStates();
 
-			// ÀÌÀü ÇÁ·¹ÀÓ ½Ã°£ ÀúÀå
+			// ì´ì „ í”„ë ˆì„ ì‹œê°„ ì €ì¥.
 			previousTime = currentTime;
 
-			// ¾×ÅÍ Á¤¸® (»èÁ¦ ¿äÃ»µÈ ¾×ÅÍµé Á¤¸®)
-			if (mainLevel) mainLevel->ProcessAddedAndDestroyActor();
+			// ì•¡í„° ì •ë¦¬ (ì‚­ì œ ìš”ì²­ëœ ì•¡í„°ë“¤ ì •ë¦¬).
+			if (mainLevel)
+			{
+				//mainLevel->DestroyActor();
+				mainLevel->ProcessAddedAndDestroyedActor();
+			}
 
-			// ÇÁ·¹ÀÓ È°¼ºÈ­
+			// í”„ë ˆì„ í™œì„±í™”.
 			shouldUpdate = true;
 		}
-
-		//Sleep(1); // ÇÁ·¹ÀÓ Á¦¾à
 	}
 }
 
 void Engine::LoadLevel(Level* newLevel)
 {
-	// ±âÁ¸ ·¹º§ÀÌ ÀÖ´Ù¸é »èÁ¦ ÈÄ ±³Ã¼
-	if (mainLevel)
-	{
-		delete mainLevel;
-	}
+	// ê¸°ì¡´ ë ˆë²¨ì´ ìˆë‹¤ë©´ ì‚­ì œ í›„ êµì²´.
 
-	// È­¸é ÃÊ±âÈ­
-	Clear();
-
-	// ¸ŞÀÎ ·¹º§ ¼³Á¤
+	// ë©”ì¸ ë ˆë²¨ ì„¤ì •.
 	mainLevel = newLevel;
 }
 
 void Engine::AddActor(Actor* newActor)
 {
-	// ¿¹¿Ü Ã³¸®
-	if (mainLevel == nullptr) return;
+	// ì˜ˆì™¸ ì²˜ë¦¬.
+	if (mainLevel == nullptr)
+	{
+		return;
+	}
 
-	// ·¹º§¿¡ ¾×ÅÍ Ãß°¡
+	// ë ˆë²¨ì— ì•¡í„° ì¶”ê°€.
 	shouldUpdate = false;
 	mainLevel->AddActor(newActor);
 }
 
 void Engine::DestroyActor(Actor* targetActor)
 {
-	// ¿¹¿Ü Ã³¸®
-	if (mainLevel == nullptr) return;
+	// ì˜ˆì™¸ ì²˜ë¦¬.
+	if (mainLevel == nullptr)
+	{
+		return;
+	}
 
-	// ·¹º§¿¡ ¾×ÅÍ Ãß°¡
+	// ë ˆë²¨ì— ì•¡í„° ì¶”ê°€.
 	shouldUpdate = false;
 	targetActor->Destroy();
 }
 
 void Engine::SetCursorType(CursorType cursorType)
 {
-	// 1. Ä¿¼­ ¼Ó¼º ±¸Á¶Ã¼ ¼³Á¤
-	CONSOLE_CURSOR_INFO info = {};
+	GetRenderer()->SetCursorType(cursorType);
+}
 
-	// Å¸ÀÔ º°·Î ±¸Á¶Ã¼ °ª ¼³Á¤
-	switch (cursorType)
+void Engine::Draw(const Vector2& position, const char* image, Color color)
+{
+	for (int ix = 0; ix < (int)strlen(image); ++ix)
 	{
-		case CursorType::NoCursor :
-			info.dwSize = 1;
-			info.bVisible = FALSE;
-			break;
+		int index = (position.y * (screenSize.x)) + position.x + ix;
 
-		case CursorType::SolidCursor :
-			info.dwSize = 100;
-			info.bVisible = FALSE;
-			break;
+		// ì¸ë±ìŠ¤ ê²½ê³„ í™•ì¸
+		if(index < 0 || index >= (screenSize.x * screenSize.y)) continue; // ë²”ìœ„ë¥¼ ì´ˆê³¼í•œ ê²½ìš° ë¬´ì‹œ
 
-		case CursorType::NormalCursor :
-			info.dwSize = 20;
-			info.bVisible = TRUE;
-			break;
+		imageBuffer[index].Char.AsciiChar = image[ix];
+		imageBuffer[index].Attributes = (unsigned long)color;
 	}
-
-	// 2. ¼³Á¤
-	SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &info);
-}
-
-void Engine::SetCursorPosition(const Vector2& position)
-{
-	SetCursorPosition(position.x, position.y);
-}
-
-void Engine::SetCursorPosition(int x, int y)
-{
-	HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
-	COORD coord = { static_cast<short>(x) ,static_cast<short>(y) };
-	SetConsoleCursorPosition(handle, coord);
 }
 
 void Engine::SetTargetFrameRate(float targetFrameRate)
 {
 	this->targetFrameRate = targetFrameRate;
-	targetOneFrameTime = 1 / targetFrameRate;
+	targetOneFrameTime = 1.0f / targetFrameRate;
 }
 
 bool Engine::GetKey(int key)
@@ -233,67 +226,157 @@ bool Engine::GetKeyUp(int key)
 
 void Engine::QuitGame()
 {
-	// Á¾·á ÇÃ·¡±× ¼³Á¤
+	// ì¢…ë£Œ í”Œë˜ê·¸ ì„¤ì •.
 	quit = true;
 }
 
 Engine& Engine::Get()
 {
-	// ½Ì±ÛÅæ °´Ã¼ ¹İÈ¯
+	// ì‹±ê¸€í†¤ ê°ì²´ ë°˜í™˜.
 	return *instance;
 }
 
 void Engine::ProcessInput()
 {
-	for (int idx = 0; idx < 255; ++idx)
+	for (int ix = 0; ix < 255; ++ix)
 	{
-		keyState[idx].isKeyDown = (GetAsyncKeyState(idx) & 0x8000) ? true : false;
+		keyState[ix].isKeyDown = (GetAsyncKeyState(ix) & 0x8000) ? true : false;
 	}
 }
 
 void Engine::Update(float deltaTime)
 {
-	//// ESC Å°·Î °ÔÀÓ Á¾·á
-	//if (GetKeyDown(VK_ESCAPE)) QuitGame();
-
-	// ·¹º§ ¾÷µ¥ÀÌÆ®
-	if (mainLevel) mainLevel->Update(deltaTime);
-
-	//std::cout << "DeltaTime: " << deltaTime << ", FPS: " << (1 / deltaTime) << "\n";
+	// ë ˆë²¨ ì—…ë°ì´íŠ¸.
+	if (mainLevel != nullptr)
+	{
+		mainLevel->Update(deltaTime);
+	}
 }
 
 void Engine::Clear()
 {
-	// ³»ºÎ ÇÁ·¹ÀÓ Á¤¸®
-	// È­¸éÀÇ (0, 0)À¸·Î ÀÌµ¿
-	SetCursorPosition(0, 0);
-
-	// È­¸é Áö¿ì±â
-	std::cout << emptyStringBuffer;
-
-	//int height = 25;
-	//for (int idx = 0; idx < height; ++idx)
-	//{
-	//	Log("                              \n");
-	//}
-
-	// È­¸éÀÇ (0, 0)À¸·Î ÀÌµ¿
-	SetCursorPosition(0, 0);
+	ClearImageBuffer();
+	GetRenderer()->Clear();
 }
 
 void Engine::Draw()
 {
-	// È­¸é Áö¿ì±â
+	// í™”ë©´ ì§€ìš°ê¸°.
 	Clear();
 
-	// ·¹º§ ±×¸®±â
-	if (mainLevel) mainLevel->Draw();
+	// ë ˆë²¨ ê·¸ë¦¬ê¸°.
+	if (mainLevel != nullptr)
+	{
+		mainLevel->Draw();
+	}
+
+	// ë°±ë²„í¼ì— ë°ì´í„° ì“°ê¸°.
+	GetRenderer()->Draw(imageBuffer);
+
+	// í”„ë¡ íŠ¸<->ë°± ë²„í¼ êµí™˜.
+	Present();
 }
 
-void Engine::SavePreiviouseKeyStates()
+void Engine::Present()
 {
-	for (int idx = 0; idx < 255; ++idx)
+	// Swap Buffer.
+	SetConsoleActiveScreenBuffer(GetRenderer()->buffer);
+	currentRenderTargetIndex = 1 - currentRenderTargetIndex;
+}
+
+void Engine::SavePreviouseKeyStates()
+{
+	for (int ix = 0; ix < 255; ++ix)
 	{
-		keyState[idx].wasKeyDown = keyState[idx].isKeyDown;
+		keyState[ix].wasKeyDown = keyState[ix].isKeyDown;
 	}
+}
+
+void Engine::ClearImageBuffer()
+{
+	// ë²„í¼ ë®ì–´ì“°ê¸°.
+	for (int y = 0; y < screenSize.y; ++y)
+	{
+		// ë²„í¼ ë®ì–´ì“°ê¸°.
+		for (int x = 0; x < screenSize.x + 1; ++x)
+		{
+			auto& buffer = imageBuffer[(y * (screenSize.x + 1)) + x];
+			buffer.Char.AsciiChar = ' ';
+			buffer.Attributes = 0;
+		}
+
+		// ê° ì¤„ ëì— ê°œí–‰ ë¬¸ì ì¶”ê°€.
+		auto& buffer = imageBuffer[(y * (screenSize.x + 1)) + screenSize.x];
+		buffer.Char.AsciiChar = '\n';
+		buffer.Attributes = 0;
+	}
+
+	// ë§ˆì§€ë§‰ì— ë„ ë¬¸ì ì¶”ê°€.
+	auto& buffer = imageBuffer[(screenSize.x + 1) * screenSize.y];
+	buffer.Char.AsciiChar = '\0';
+	buffer.Attributes = 0;
+}
+
+void Engine::InitializeConsole(int pixelWidth,int pixelHeight)
+{
+	// ìƒˆë¡œìš´ ì½˜ì†” ì°½ ìƒì„±
+	AllocConsole();
+
+	HWND consoleWindow = GetConsoleWindow();
+	if(consoleWindow == NULL) return;
+
+	// ë¬¸ì ì…€ í¬ê¸°ë¥¼ ëª…ì‹œì ìœ¼ë¡œ ì„¤ì •
+	CONSOLE_FONT_INFOEX cfi;
+	cfi.cbSize = sizeof(cfi);
+	cfi.nFont = 0;
+	cfi.dwFontSize.X = 8;
+	cfi.dwFontSize.Y = 16;
+	cfi.FontFamily = FF_DONTCARE;
+	cfi.FontWeight = FW_NORMAL;
+	wcscpy_s(cfi.FaceName,L"Terminal");
+	SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE),FALSE,&cfi);
+
+	// screenSizeë¥¼ ë¨¼ì € ì—…ë°ì´íŠ¸ (ê¸€ì í¬ê¸°ë¡œ ë‚˜ëˆˆ ê°’)
+	screenSize.x = pixelWidth / cfi.dwFontSize.X;
+	screenSize.y = pixelHeight / cfi.dwFontSize.Y;
+
+	// ì½˜ì†” ë²„í¼ í¬ê¸° ì„¤ì •
+	COORD bufferSize = {(SHORT)(screenSize.x),(SHORT)(screenSize.y)};
+	SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE),bufferSize);
+
+	// ì½˜ì†” ì°½ í¬ê¸° ì„¤ì •
+	SMALL_RECT rect = {0,0,bufferSize.X - 1,bufferSize.Y - 1};
+	//SMALL_RECT rect = {0,0,(SHORT)screenSize.x - 1,(SHORT)screenSize.y - 1};
+	SetConsoleWindowInfo(GetStdHandle(STD_OUTPUT_HANDLE),TRUE,&rect);
+
+	// ì°½ ìœ„ì¹˜ë¥¼ í™”ë©´ ì¤‘ì•™ìœ¼ë¡œ ì´ë™
+	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+	int x = (screenWidth - pixelWidth) / 2;
+	int y = (screenHeight - pixelHeight) / 2;
+
+	Sleep(100);
+	MoveWindow(consoleWindow,x,y,pixelWidth,pixelHeight,TRUE);
+	Sleep(100);
+	// screenSize ì—…ë°ì´íŠ¸
+	//screenSize.x = bufferSize.X;
+	//screenSize.y = bufferSize.Y;
+}
+
+void Engine::InitializeScreenBuffers()
+{
+	// ë²„í¼ ì´ˆê¸°í™” ë¡œì§ì„ ë³„ë„ í•¨ìˆ˜ë¡œ ë¶„ë¦¬
+	imageBuffer = new CHAR_INFO[(screenSize.x + 1) * screenSize.y + 1];
+	ClearImageBuffer();
+
+	COORD size = {(short)screenSize.x,(short)screenSize.y};
+	renderTargets[0] = new ScreenBuffer(GetStdHandle(STD_OUTPUT_HANDLE),size);
+	renderTargets[1] = new ScreenBuffer(size);
+}
+
+void Engine::ResizeConsole(int x,int y,int width,int height)
+{
+	HWND consoleWindow = GetConsoleWindow();
+	if(consoleWindow == NULL) return;
+	MoveWindow(consoleWindow,x,y,width,height,TRUE);
 }

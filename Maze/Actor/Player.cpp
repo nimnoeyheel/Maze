@@ -6,10 +6,10 @@
 Player::Player(const Vector2& position, GameLevel* level)
 	: DrawableActor("P"), refLevel(level)
 {
-	// À§Ä¡ ¼³Á¤
+	// ìœ„ì¹˜ ì„¤ì •
 	this->position = position;
 
-	// »ö»ó ¼³Á¤
+	// ìƒ‰ìƒ ì„¤ì •
 	color = Color::White;
 }
 
@@ -17,16 +17,14 @@ void Player::Update(float deltaTime)
 {
 	Super::Update(deltaTime);
 
-	// ESC Á¾·á
+	// ESC ì¢…ë£Œ
 	if (Engine::Get().GetKeyDown(VK_ESCAPE))
 	{
-		//Engine::Get().QuitGame();
-
-		// ¸Þ´º Åä±Û
+		// ë©”ë‰´ í† ê¸€
 		Game::Get().ToggleMenu();
 	}
 
-	// »óÇÏÁÂ¿ì ÀÌµ¿
+	// ìƒí•˜ì¢Œìš° ì´ë™
 	if (Engine::Get().GetKey(VK_LEFT))
 	{
 		refLevel->MoveConsole(-5, 0);

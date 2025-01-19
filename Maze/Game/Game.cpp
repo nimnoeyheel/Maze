@@ -65,6 +65,6 @@ void Game::LoadStage(int stageNumber)
 		return;
 	}
 
-	Engine::Get().LoadLevel(newLevel); // »õ·Î¿î ·¹º§ ·Îµå
+	Engine::Get().LoadLevel(newLevel); // ìƒˆë¡œìš´ ë ˆë²¨ ë¡œë“œ
 
 }

@@ -37,8 +37,6 @@ public:
 	virtual void Update(float deltaTime) override;
 	virtual void Draw() override;
 
-	void SetConsoleWindowToCenter(int pixelWidth, int pixelHeight);
-
 private:
 	int currentIndex = 0;
 	Color selectedColor = Color::Green;

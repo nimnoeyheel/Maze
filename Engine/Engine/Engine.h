@@ -3,98 +3,112 @@
 #include "Core.h"
 #include "Math/Vector2.h"
 
-// ÀÔ·Â Ã³¸®¸¦ À§ÇÑ ±¸Á¶Ã¼
+// ì…ë ¥ ì²˜ë¦¬ë¥¼ ìœ„í•œ êµ¬ì¡°ì²´.
 struct KeyState
 {
-	bool isKeyDown = false;  // ÇöÀç ÇÁ·¹ÀÓ¿¡ Å°°¡ ´­·È´ÂÁö È®ÀÎ
-	bool wasKeyDown = false; // ÀÌÀü ÇÁ·¹ÀÓ¿¡ Å°°¡ ´­·È´ÂÁö È®ÀÎ
+	// í˜„ì¬ í”„ë ˆì„ì— í‚¤ê°€ ëˆŒë ¸ëŠ”ì§€ í™•ì¸.
+	bool isKeyDown = false;
+
+	// ì´ì „ í”„ë ˆì„ì— í‚¤ê°€ ëˆŒë ¸ì—ˆëŠ”ì§€ í™•ì¸.
+	bool wasKeyDown = false;
 };
 
-// Ä¿¼­ÀÇ Á¾·ù¸¦ ¼³Á¤ÇÒ ¶§ »ç¿ëÇÒ ¿­°ÅÇü
-enum class CursorType
-{
-	NoCursor,
-	SolidCursor,
-	NormalCursor
-};
-
-
-// Level, Actor Å¬·¡½º Àü¹æ ¼±¾ğ
+// ì—”ì§„ í´ë˜ìŠ¤.
 class Level;
 class Actor;
+class ScreenBuffer;
 class ENGINE_API Engine
 {
 public:
 	Engine();
 	virtual ~Engine();
 
-	// ¿£Áø ½ÇÇà ÇÔ¼ö
+	// ì—”ì§„ ì‹¤í–‰ í•¨ìˆ˜.
 	void Run();
 
+	// ë ˆë²¨ ì¶”ê°€ í•¨ìˆ˜.
 	void LoadLevel(Level* newLevel);
 
+	// ì•¡í„° ì¶”ê°€/ì‚­ì œ í•¨ìˆ˜.
 	void AddActor(Actor* newActor);
 	void DestroyActor(Actor* targetActor);
 
-	// È­¸é ÁÂÇ¥
+	// í™”ë©´ ì¢Œí‘œ ê´€ë ¨ í•¨ìˆ˜.
 	void SetCursorType(CursorType cursorType);
-	void SetCursorPosition(const Vector2& position);
-	void SetCursorPosition(int x, int y);
+	//void SetCursorPosition(const Vector2& position);
+	//void SetCursorPosition(int x, int y);
 
-	// È­¸é Å©±â ¹İÈ¯ ÇÔ¼ö
+	void Draw(const Vector2& position, const char* image, Color color = Color::White);
+
+	// í™”ë©´ í¬ê¸° ë°˜í™˜ í•¨ìˆ˜.
 	inline Vector2 ScreenSize() const { return screenSize; }
 
-	// Å¸ÄÏ ÇÁ·¹ÀÓ ¼Óµµ ¼³Á¤ ÇÔ¼ö
+	// íƒ€ê²Ÿ í”„ë ˆì„ ì†ë„ ì„¤ì • í•¨ìˆ˜.
 	void SetTargetFrameRate(float targetFrameRate);
 
-	// ÀÔ·Â °ü·Ã ÇÔ¼ö
+	// ì…ë ¥ ê´€ë ¨ í•¨ìˆ˜.
 	bool GetKey(int key);
 	bool GetKeyDown(int key);
 	bool GetKeyUp(int key);
 
-	// ¿£Áø Á¾·á ÇÔ¼ö
+	// ì—”ì§„ ì¢…ë£Œ í•¨ìˆ˜.
 	void QuitGame();
 
-	// ½Ì±ÛÅæ °´Ã¼ 
-	// Á¢±Ù ÇÔ¼ö
+	// ì‹±ê¸€í†¤ ê°ì²´ ì ‘ê·¼ í•¨ìˆ˜.
 	static Engine& Get();
 
+	// ë²„í¼ ì´ˆê¸°í™” í•¨ìˆ˜.
+	void InitializeScreenBuffers();
+
+	// ì½˜ì†”ì°½ í¬ê¸° ì¡°ì ˆ í•¨ìˆ˜.
+	void ResizeConsole(int x,int y,int width,int height);
+
 protected:
-	void ProcessInput();			// ÀÔ·ÂÃ³¸®
-	void Update(float deltaTime);	// Tick
+	void ProcessInput();				// ì…ë ¥ ì²˜ë¦¬.
+	void Update(float deltaTime);		// Tick();
 
-	void Clear();					// È­¸é Áö¿ì±â
-	void Draw();					// ·»´õ¸µ - GPUµ¿ÀÛ / set data -> draw call.
+	void Clear();						// í™”ë©´ ì§€ìš°ê¸°.
+	void Draw();						// Render();
+	void Present();
 
-	// ÀÌÀü Å° »óÅÂ¸¦ ÀúÀåÇÏ´Â ÇÔ¼ö
-	void SavePreiviouseKeyStates();
+	// ì´ì „ í”„ë ˆì„ì˜ í‚¤ ìƒíƒœë¥¼ ì €ì¥í•˜ëŠ” í•¨ìˆ˜.
+	void SavePreviouseKeyStates();
 
-	// ¸ŞÀÎ ·¹º§ º¯¼ö
-	Level* mainLevel;
+	inline ScreenBuffer* GetRenderer() const { return renderTargets[currentRenderTargetIndex]; }
+	void ClearImageBuffer();
 
-private:
-	// Å¸ÄÏ ÇÁ·¹ÀÓ º¯¼ö(ÃÊ´ç ÇÁ·¹ÀÓ)
-	float targetFrameRate = 60;
+	void InitializeConsole(int pixelWidth,int pixelHeight);
 
-	// ÇÑ ÇÁ·¹ÀÓ ½Ã°£ °ª(´ÜÀ§: ÃÊ)
-	float targetOneFrameTime = 0;
+protected:
 
-	// °ÔÀÓ Á¾·á ½Ã ¼³Á¤ÇÒ º¯¼ö
+	// íƒ€ê²Ÿ í”„ë ˆì„ ë³€ìˆ˜(ì´ˆë‹¹ í”„ë ˆì„).
+	float targetFrameRate = 60.0f;
+
+	// í•œ í”„ë ˆì„ ì‹œê°„ ê°’(ë‹¨ìœ„: ì´ˆ).
+	float targetOneFrameTime = 0.0f;
+
+	// ì¢…ë£Œí•  ë•Œ ì„¤ì •í•  ë³€ìˆ˜.
 	bool quit;
 
-	// Å° »óÅÂ¸¦ ÀúÀåÇÏ´Â ¹è¿­
+	// í‚¤ ìƒíƒœë¥¼ ì €ì¥í•˜ëŠ” ë°°ì—´.
 	KeyState keyState[255];
 
-	// ½Ì±ÛÅæ ±¸ÇöÀ» À§ÇÑ Àü¿ª º¯¼ö ¼±¾ğ - ¸â¹ö º¯¼ö´Â °´Ã¼ Á¾¼ÓÀûÀÌÁö ¾Ê¾Æ¼­ ÃÊ±âÈ­ ÇØ¾ßÇÔ
+	// ì‹±ê¸€í†¤ êµ¬í˜„ì„ ìœ„í•œ ì „ì—­ ë³€ìˆ˜ ì„ ì–¸.
 	static Engine* instance;
 
-	// ÇÁ·¹ÀÓÀ» ¾÷µ¥ÀÌÆ®ÇØ¾ß ÇÏ´ÂÁö ¿©ºÎ¸¦ ³ªÅ¸³»´Â º¯¼ö
+	// ë©”ì¸ ë ˆë²¨ ë³€ìˆ˜.
+	Level* mainLevel;
+
+	// í”„ë ˆì„ì„ ì—…ë°ì´íŠ¸í•´ì•¼ í•˜ëŠ”ì§€ ì—¬ë¶€ë¥¼ ë‚˜íƒ€ë‚´ëŠ” ë³€ìˆ˜.
 	bool shouldUpdate = true;
 
-	// È­¸é Å©±â
+	// í™”ë©´ í¬ê¸°.
 	Vector2 screenSize;
 
-	// È­¸é Áö¿ï ¶§ »ç¿ëÇÒ ¹öÆÛ(Buffer/Blob)
-	char* emptyStringBuffer = nullptr;
-};
+	// í™”ë©´ ì§€ìš¸ ë•Œ ì‚¬ìš©í•  ë²„í¼(Buffer/Blob).
+	CHAR_INFO* imageBuffer = nullptr;
 
+	// í™”ë©´ ë²„í¼.
+	ScreenBuffer* renderTargets[2];
+	int currentRenderTargetIndex = 0;
+};
