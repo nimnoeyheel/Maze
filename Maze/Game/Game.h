@@ -14,6 +14,8 @@ public:
 
 	static Game& Get() { return *instance; }
 
+	void SetConsoleWindow(int x,int y,int width,int height);
+
 private:
 	bool showMenu = false;
 

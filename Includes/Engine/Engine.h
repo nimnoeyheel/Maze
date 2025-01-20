@@ -60,9 +60,6 @@ public:
 	// 버퍼 초기화 함수.
 	void InitializeScreenBuffers();
 
-	// 콘솔창 크기 조절 함수.
-	void ResizeConsole(int x,int y,int width,int height);
-
 protected:
 	void ProcessInput();				// 입력 처리.
 	void Update(float deltaTime);		// Tick();

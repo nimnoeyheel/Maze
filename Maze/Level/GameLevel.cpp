@@ -12,7 +12,7 @@
 GameLevel::GameLevel(const std::string& fileName, int startX, int startY, int width, int height)
 	: consoleX(startX), consoleY(startY), consoleWidth(width), consoleHeight(height)
 {
-	SetConsoleWindow(consoleX,consoleY, consoleWidth,consoleHeight);
+	//SetConsoleWindow(consoleX,consoleY, consoleWidth,consoleHeight);
 
 	// 커서 감추기
 	Engine::Get().SetCursorType(CursorType::NoCursor);
@@ -38,20 +38,28 @@ GameLevel::GameLevel(const std::string& fileName, int startX, int startY, int wi
 
 			// 문자에 따라 액터 생성
 			if (mapChar == '1') {
-				row.push_back(new Wall(Vector2(xPosition, yPosition)));
+				Wall* wall = new Wall(Vector2(xPosition,yPosition));
+				row.push_back(wall);
+				map.push_back(wall);
 			}
 			else if (mapChar == '.') {
-				row.push_back(new Ground(Vector2(xPosition, yPosition)));
+				Ground* ground = new Ground(Vector2(xPosition,yPosition));
+				row.push_back(ground);
+				map.push_back(ground);
 			}
 			else if (mapChar == 'E') {
-				row.push_back(new Goal(Vector2(xPosition, yPosition)));
+				goal = new Goal(Vector2(xPosition,yPosition));
+				row.push_back(goal);
 			}
 			else if (mapChar == 'P') {
-				row.push_back(new Player(Vector2(xPosition, yPosition), this));
-				player = dynamic_cast<Player*>(row.back());
+				Ground* ground = new Ground(Vector2(xPosition,yPosition));
+				row.push_back(ground);
+				map.push_back(ground);
 
-				//consoleX = std::max(0, xPosition - consoleWidth / 2);
-				//consoleY = std::max(0, yPosition - consoleHeight / 2);
+				player = new Player(Vector2(xPosition,yPosition),this);
+				row.push_back(player);
+				//row.push_back(new Player(Vector2(xPosition, yPosition), this));
+				//player = dynamic_cast<Player*>(row.back());
 			}
 			else {
 				row.push_back(nullptr); // 빈 공간
@@ -108,33 +116,45 @@ void GameLevel::Draw()
 	float scaleY = static_cast<float>(screenHeight) / mapHeight;
 
 	// 화면에 보일 부분만 백 버퍼에 렌더링
-	for (int y = 0; y < consoleHeight; ++y) {
+	for (int y = 0; y < consoleHeight; ++y)
+	{
 		int mapY = consoleY / (scaleY) + y; // 맵의 Y 좌표 계산
-		//int mapY = static_cast<int> (consoleY + y / scaleY); // 맵의 Y 좌표 계산
 		if (mapY < 0 || mapY >= mapHeight) continue;  // mapData 범위 초과 시 무시
 
-		for (int x = 0; x < consoleWidth; ++x) {
+		for (int x = 0; x < consoleWidth; ++x)
+		{
 			int mapX = consoleX / (scaleX) + x ; // 맵의 X 좌표 계산
-			//int mapX = static_cast<int> (consoleX + x / scaleX); // 맵의 X 좌표 계산
 			if (mapX < 0 || mapX >= mapWidth) continue;  // mapData 범위 초과 시 무시
 
 			// 맵 데이터에서 Actor 가져오기
 			DrawableActor* actor = dynamic_cast<DrawableActor*>(mapData[mapY][mapX]);
-			if(actor) {
-				// Actor의 심볼과 색상을 백 버퍼에 쓰기
-				Engine::Get().Draw(Vector2(x,y),actor->GetSymbol(),actor->GetColor());
+			if(actor)
+			{
+				if(actor->Position() == player->Position())
+				{ 
+					//player->SetPosition(Vector2(x,y));
+					//player->Draw();
+					continue;
+				}
+				bool shouldDraw = true;
+				if(shouldDraw)
+				{
+					// Actor의 심볼과 색상을 백 버퍼에 쓰기
+					Engine::Get().Draw(Vector2(x,y),actor->GetSymbol(),actor->GetColor());
+				}
 			}
 		}
 	}
 
-	// 플레이어 위치 중앙에 고정
-	if (player)
-	{
-		int playerX = consoleWidth / 2;
-		int playerY = consoleHeight / 2;
-		player->SetPosition(Vector2(playerX, playerY));
-		player->Draw();
-	}
+
+	//// 플레이어 위치 중앙에 고정
+	//if (player)
+	//{
+	//	int playerX = consoleWidth / 2;
+	//	int playerY = consoleHeight / 2;
+	//	player->SetPosition(Vector2(playerX, playerY));
+	//	player->Draw();
+	//}
 
 }
 
@@ -143,7 +163,20 @@ bool GameLevel::CanPlayerMove(const Vector2& position)
 	// 게임이 클리어된 경우 바로 종료
 	if (isGameClear) return false;
 
+	int x = static_cast<int>(position.x);
+	int y = static_cast<int>(position.y);
 
+	if(x<0 || y<0 || y >=mapHeight || x>= mapWidth) return false;
+
+	Actor* targetActor = mapData[y][x];
+
+	if(!targetActor) return true;
+
+	if(dynamic_cast<Wall*>(targetActor)) return false;
+
+	if(dynamic_cast<Ground*>(targetActor) || dynamic_cast<Goal*>(targetActor)) return true;
+
+	return false;
 }
 
 void GameLevel::MoveConsole(int dx, int dy)
@@ -167,7 +200,7 @@ void GameLevel::SetConsoleWindow(int x,int y,int width,int height)
 {
 	HWND consoleWindow = GetConsoleWindow();
 	if(consoleWindow == NULL) return;
-
+	
 	// 콘솔 폰트 크기 재설정으로 시작
 	CONSOLE_FONT_INFOEX cfi;
 	cfi.cbSize = sizeof(cfi);

@@ -128,7 +128,7 @@ void Engine::Run()
 			if (shouldUpdate)
 			{
 				Update(deltaTime);
-				Draw();
+				Draw(); // @Todo : 프레임마다 Draw 함수 호출하면서 Draw함수 내부에서 백버퍼 프론트버퍼 교환해주고 있음
 			}
 
 			// 키 상태 저장.
@@ -273,7 +273,7 @@ void Engine::Draw()
 	// 백버퍼에 데이터 쓰기.
 	GetRenderer()->Draw(imageBuffer);
 
-	// 프론트<->백 버퍼 교환.
+	// 프론트<->백 버퍼 교환. //@Todo : 프레임마다 호출해주고 있음 수정 필요
 	Present();
 }
 
@@ -358,6 +358,7 @@ void Engine::InitializeConsole(int pixelWidth,int pixelHeight)
 	Sleep(100);
 	MoveWindow(consoleWindow,x,y,pixelWidth,pixelHeight,TRUE);
 	Sleep(100);
+
 	// screenSize 업데이트
 	screenSize.x = bufferSize.X;
 	screenSize.y = bufferSize.Y;
@@ -372,11 +373,4 @@ void Engine::InitializeScreenBuffers()
 	COORD size = {(short)screenSize.x,(short)screenSize.y};
 	renderTargets[0] = new ScreenBuffer(GetStdHandle(STD_OUTPUT_HANDLE),size);
 	renderTargets[1] = new ScreenBuffer(size);
-}
-
-void Engine::ResizeConsole(int x,int y,int width,int height)
-{
-	HWND consoleWindow = GetConsoleWindow();
-	if(consoleWindow == NULL) return;
-	MoveWindow(consoleWindow,x,y,width,height,TRUE);
 }

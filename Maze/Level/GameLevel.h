@@ -6,6 +6,9 @@
 
 #pragma region 클래스 전방선언
 class DrawableActor;
+class Wall;
+class Ground;
+class Goal;
 class Player;
 #pragma endregion
 
@@ -48,7 +51,8 @@ private:
 	// 액터 데이터를 저장하는 2D 컨테이너
 	std::vector<std::vector<Actor*>> mapData;
 
-	// 플레이어 액터
+	std::vector<DrawableActor*> map;
+	Goal* goal;
 	Player* player = nullptr;
 
 	// 게임 클리어 변수
