@@ -104,16 +104,18 @@ void GameLevel::Update(float deltaTime)
 void GameLevel::Draw()
 {
 	// 맵 크기와 스크린 비율 계산
-	//float scaleX = static_cast<float>(consoleWidth) / mapWidth;
-	//float scaleY = static_cast<float>(consoleHeight) / mapHeight;
+	float scaleX = static_cast<float>(screenWidth) / mapWidth;
+	float scaleY = static_cast<float>(screenHeight) / mapHeight;
 
 	// 화면에 보일 부분만 백 버퍼에 렌더링
 	for (int y = 0; y < consoleHeight; ++y) {
-		int mapY = consoleY + y; // 맵의 Y 좌표 계산
+		int mapY = consoleY / (scaleY) + y; // 맵의 Y 좌표 계산
+		//int mapY = static_cast<int> (consoleY + y / scaleY); // 맵의 Y 좌표 계산
 		if (mapY < 0 || mapY >= mapHeight) continue;  // mapData 범위 초과 시 무시
 
 		for (int x = 0; x < consoleWidth; ++x) {
-			int mapX = consoleX + x; // 맵의 X 좌표 계산
+			int mapX = consoleX / (scaleX) + x ; // 맵의 X 좌표 계산
+			//int mapX = static_cast<int> (consoleX + x / scaleX); // 맵의 X 좌표 계산
 			if (mapX < 0 || mapX >= mapWidth) continue;  // mapData 범위 초과 시 무시
 
 			// 맵 데이터에서 Actor 가져오기
@@ -126,13 +128,13 @@ void GameLevel::Draw()
 	}
 
 	// 플레이어 위치 중앙에 고정
-	/*if (player)
+	if (player)
 	{
 		int playerX = consoleWidth / 2;
 		int playerY = consoleHeight / 2;
 		player->SetPosition(Vector2(playerX, playerY));
 		player->Draw();
-	}*/
+	}
 
 }
 
@@ -148,9 +150,6 @@ void GameLevel::MoveConsole(int dx, int dy)
 {
 	consoleX += dx;
 	consoleY += dy;
-
-	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
-	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 
 	if (consoleX < 0) consoleX = 0;
 	if (consoleY < 0) consoleY = 0;

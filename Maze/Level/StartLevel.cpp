@@ -5,7 +5,7 @@
 
 StartLevel::StartLevel()
 {
-	menuItems.PushBack(new MenuItem("Start Game", []() { Game::Get().LoadStage(1); }));
+	menuItems.PushBack(new MenuItem("Start Game", []() { Game::Get().LoadStage(3); }));
 	menuItems.PushBack(new MenuItem("Quit Game", []() { Game::Get().QuitGame(); }));
 	length = menuItems.Size();
 }

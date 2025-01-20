@@ -359,8 +359,8 @@ void Engine::InitializeConsole(int pixelWidth,int pixelHeight)
 	MoveWindow(consoleWindow,x,y,pixelWidth,pixelHeight,TRUE);
 	Sleep(100);
 	// screenSize 업데이트
-	//screenSize.x = bufferSize.X;
-	//screenSize.y = bufferSize.Y;
+	screenSize.x = bufferSize.X;
+	screenSize.y = bufferSize.Y;
 }
 
 void Engine::InitializeScreenBuffers()

@@ -42,6 +42,9 @@ private:
 	int consoleWidth;  // 콘솔 너비
 	int consoleHeight; // 콘솔 높이
 
+	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+
 	// 액터 데이터를 저장하는 2D 컨테이너
 	std::vector<std::vector<Actor*>> mapData;
 
