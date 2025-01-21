@@ -5,8 +5,8 @@
 #include <string>
 
 
-ClearLevel::ClearLevel(int _stageNum, int _score)
-	: stageNum(_stageNum), score(_score)
+ClearLevel::ClearLevel(int _stageNum, int _score, int _playTime)
+	: stageNum(_stageNum), score(_score), playTime(_playTime)
 {
 	menuItems.push_back(new MenuItem("Next Stage",this,&ClearLevel::LoadNextStage,stageNum));
 	menuItems.push_back(new MenuItem("Quit Game",+[](int) { Game::Get().QuitGame(); },0));
@@ -55,20 +55,36 @@ void ClearLevel::Draw()
 	Engine::Get().Draw(Vector2(startX,startY),clearLog.c_str(),unselectedColor);
 
 	// 스코어 로그
-	std::string scoreLog = "Score : " + std::to_string(score);
-	Engine::Get().Draw(Vector2(startX,startY + 2),scoreLog.c_str(),unselectedColor);
+	std::string scoreLog = "Score " + std::to_string(score);
+	Engine::Get().Draw(Vector2(startX,startY + 2),scoreLog.c_str(),Color::White);
+
+	// 플레이 타임 로그
+	int totalSeconds = static_cast<int>(playTime);
+	int minutes = totalSeconds / 60;
+	int seconds = totalSeconds % 60;
+	std::string playTimeLog = "Play Time ";
+
+	if(minutes > 0)
+	{
+		playTimeLog += std::to_string(minutes) + "min " + std::to_string(seconds) + "sec";
+	}
+	else
+	{
+		playTimeLog += std::to_string(seconds) + "sec";
+	}
+	Engine::Get().Draw(Vector2(startX,startY + 3),playTimeLog.c_str(),Color::White);
 
 	// 메뉴 로그
 	for(int i = 0; i < length; ++i)
 	{
 		Color textColor = (i == currentIndex) ? selectedColor : unselectedColor;
-		Engine::Get().Draw(Vector2(startX,startY + i + 4),menuItems[i]->menuText,textColor);
+		Engine::Get().Draw(Vector2(startX,startY + i + 5),menuItems[i]->menuText,textColor);
 	}
 }
 
 void ClearLevel::LoadNextStage(int stageNum)
 {
-	Game::Get().LoadStage(stageNum+1);
+	Game::Get().LoadStage(++stageNum);
 }
 
 void ClearLevel::QuitGame(int)

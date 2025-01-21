@@ -52,7 +52,7 @@ class ClearLevel : public Level
 	RTTI_DECLARATIONS(ClearLevel, Level)
 
 public:
-	ClearLevel(int _stageNum, int _score);
+	ClearLevel(int _stageNum, int _score, int _playTime);
 	~ClearLevel();
 
 	virtual void Update(float deltaTime) override;
@@ -71,4 +71,5 @@ private:
 
 	int stageNum;
 	int score;
+	int playTime;
 };

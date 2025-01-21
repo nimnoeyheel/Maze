@@ -65,7 +65,7 @@ void Player::Update(float deltaTime)
 		if(refLevel->CanPlayerMove(newPosition))
 		{
 			SetPosition(newPosition);
-			refLevel->MoveConsole(direction.x * 5,direction.y *5);
+			refLevel->MoveConsole(direction.x * 5,direction.y * 5);
 		}
 	}
 }

@@ -12,7 +12,7 @@ Actor::~Actor()
 {
 }
 
-void Actor::Update(float delatTime)
+void Actor::Update(float deltaTime)
 {
 }
 

@@ -69,10 +69,10 @@ GameLevel::GameLevel(int stageNum, const std::string& fileName, int startX, int 
 	// 플레이어 생성 위치 설정
 	float scaleX = static_cast<float>(screenWidth) / mapWidth;
 	float scaleY = static_cast<float>(screenHeight) / mapHeight;
-	int screenHalfX = 350 / 16 / 2;
-	int screenHalfY = 350 / 16 / 2;
-	int mapX = consoleX / (scaleX)+ screenHalfX;
-	int mapY = consoleY / (scaleY)+ screenHalfY;
+	int HalfX = 350 / 16 / 2;
+	int HalfY = 350 / 16 / 2;
+	int mapX = consoleX / scaleX + HalfX;
+	int mapY = consoleY / scaleY + HalfY;
 
 	player = new Player(Vector2(mapX,mapY),this);
 
@@ -86,6 +86,8 @@ void GameLevel::Update(float deltaTime)
 	// 플레이어 업데이트
 	if (player) player->Update(deltaTime);
 
+	playTime += deltaTime;
+
 	// 스테이지 클리어 처리
 	if (isGameClear)
 	{
@@ -96,23 +98,12 @@ void GameLevel::Update(float deltaTime)
 
 		if(stageNum <= 3)
 		{
-			Engine::Get().LoadLevel(new ClearLevel(stageNum, score)); // 새로운 레벨 로드
+			// 클리어 레벨 로드
+			Engine::Get().LoadLevel(new ClearLevel(stageNum, score, static_cast<int>(playTime)));
 			score = 0;
+			playTime = 0;
 		}
-
-		// 커서 이동
-		//Engine::Get().SetCursorPosition(0, Engine::Get().ScreenSize().y);
-
-		// 메세지 출력
-		//Log("Game Clear!\n");
-
-		// 쓰레드 정지
-		//Sleep(2000);
-
-		// 게임 종료 처리
-		//Engine::Get().QuitGame();
 	}
-
 }
 
 void GameLevel::Draw()
@@ -176,7 +167,20 @@ bool GameLevel::CanPlayerMove(const Vector2& position)
 
 	if(dynamic_cast<Seed*>(targetActor))
 	{
-		targetActor->Destroy();
+		//Engine::Get().DestroyActor(targetActor);
+		//targetActor->Destroy();
+
+		// 배열에서 targetActor를 찾아 제거
+		auto it = std::find(actors.begin(),actors.end(),targetActor);
+		if(it != actors.end())
+		{
+			delete *it;
+			*it = nullptr;
+			actors.erase(it);
+		}
+
+		// 맵 데이터에서도 제거
+		mapData[y][x] = nullptr;
 		++score;
 		return true;
 	}

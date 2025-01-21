@@ -7,17 +7,16 @@
 #include <stdlib.h>
 #include <crtdbg.h>
 
-// ìƒ‰ìƒ ì—´ê±°í˜•.
+// »ö»ó ¿­°ÅÇü.
 enum class Color : unsigned short
 {
 	Red = FOREGROUND_RED,
 	Green = FOREGROUND_GREEN,
 	Blue = FOREGROUND_BLUE,
-	Yellow = Red + Green,
 	White = Red + Green + Blue,
 };
 
-// ì»¤ì„œì˜ ì¢…ë¥˜ë¥¼ ì„¤ì •í•  ë•Œ ì‚¬ìš©í•  ì—´ê±°í˜•.
+// Ä¿¼­ÀÇ Á¾·ù¸¦ ¼³Á¤ÇÒ ¶§ »ç¿ëÇÒ ¿­°ÅÇü.
 enum class CursorType
 {
 	NoCursor,
@@ -25,7 +24,7 @@ enum class CursorType
 	NormalCursor
 };
 
-// ì½˜ì†” ìƒ‰ìƒ ì„¤ì • í•¨ìˆ˜.
+// ÄÜ¼Ö »ö»ó ¼³Á¤ ÇÔ¼ö.
 //inline void SetColor(Color color)
 //{
 //	SetConsoleTextAttribute(
@@ -34,7 +33,7 @@ enum class CursorType
 //	);
 //}
 
-// ë©”ëª¨ë¦¬ ì‚­ì œ í•¨ìˆ˜.
+// ¸Ş¸ğ¸® »èÁ¦ ÇÔ¼ö.
 template<typename T>
 void SafeDelete(T* pointer)
 {
@@ -45,7 +44,7 @@ void SafeDelete(T* pointer)
 	}
 }
 
-// ë¡œê·¸ í•¨ìˆ˜.
+// ·Î±× ÇÔ¼ö.
 template<typename... T>
 void Log(const char* format, T&&... args)
 {
@@ -54,29 +53,29 @@ void Log(const char* format, T&&... args)
 	std::cout << buffer;
 }
 
-// ëœë¤ í•¨ìˆ˜.
+// ·£´ı ÇÔ¼ö.
 inline int Random(int min, int max)
 {
-	// ì°¨ì´ êµ¬í•˜ê¸°.
+	// Â÷ÀÌ ±¸ÇÏ±â.
 	int diff = (max - min) + 1;
 	return ((diff * rand()) / (RAND_MAX + 1)) + min;
 }
 
-// min~max ì‚¬ì´ì˜ ëœë¤ ê°’ì„ ë°˜í™˜í•´ì£¼ëŠ” í•¨ìˆ˜.
+// min~max »çÀÌÀÇ ·£´ı °ªÀ» ¹İÈ¯ÇØÁÖ´Â ÇÔ¼ö.
 inline float RandomPercent(float min, float max)
 {
 	float random = (float)(rand() / (float)RAND_MAX);
 	return random * (max - min) + min;
 }
 
-// ë©”ëª¨ë¦¬ ëˆ„ìˆ˜ í™•ì¸í•  ë•Œ ì‚¬ìš©í•˜ëŠ” í•¨ìˆ˜.
+// ¸Ş¸ğ¸® ´©¼ö È®ÀÎÇÒ ¶§ »ç¿ëÇÏ´Â ÇÔ¼ö.
 inline void CheckMemoryLeak()
 {
 	// https://learn.microsoft.com/ko-kr/cpp/c-runtime-library/find-memory-leaks-using-the-crt-library?view=msvc-170
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 }
 
-// ë””ë²„ê¹… ìš©ë„.
+// µğ¹ö±ë ¿ëµµ.
 #ifdef _DEBUG
 #define new new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
 // Replace _NORMAL_BLOCK with _CLIENT_BLOCK if you want the

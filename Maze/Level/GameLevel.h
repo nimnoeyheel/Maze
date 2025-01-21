@@ -64,6 +64,6 @@ private:
 
 	int stageNum;
 	int score = 0;
-
+	float playTime = 0;
 };
 
