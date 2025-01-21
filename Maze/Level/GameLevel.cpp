@@ -8,12 +8,12 @@
 #include <string>
 #include <fstream>
 #include <algorithm>
+#include "ClearLevel.h"
+#include "Actor/Seed.h"
 
-GameLevel::GameLevel(const std::string& fileName, int startX, int startY, int width, int height)
-	: consoleX(startX), consoleY(startY), consoleWidth(width), consoleHeight(height)
+GameLevel::GameLevel(int stageNum, const std::string& fileName, int startX, int startY, int width, int height)
+	: stageNum(stageNum),consoleX(startX),consoleY(startY),consoleWidth(width),consoleHeight(height)
 {
-	//SetConsoleWindow(consoleX,consoleY, consoleWidth,consoleHeight);
-
 	// 커서 감추기
 	Engine::Get().SetCursorType(CursorType::NoCursor);
 
@@ -40,26 +40,19 @@ GameLevel::GameLevel(const std::string& fileName, int startX, int startY, int wi
 			if (mapChar == '1') {
 				Wall* wall = new Wall(Vector2(xPosition,yPosition));
 				row.push_back(wall);
-				map.push_back(wall);
 			}
 			else if (mapChar == '.') {
 				Ground* ground = new Ground(Vector2(xPosition,yPosition));
 				row.push_back(ground);
-				map.push_back(ground);
+			}
+			else if(mapChar == 'S') {
+				Seed* seed = new Seed(Vector2(xPosition,yPosition));
+				row.push_back(seed);
 			}
 			else if (mapChar == 'E') {
-				goal = new Goal(Vector2(xPosition,yPosition));
+				Goal* goal = new Goal(Vector2(xPosition,yPosition));
 				row.push_back(goal);
-			}
-			else if (mapChar == 'P') {
-				Ground* ground = new Ground(Vector2(xPosition,yPosition));
-				row.push_back(ground);
-				map.push_back(ground);
-
-				player = new Player(Vector2(xPosition,yPosition),this);
-				row.push_back(player);
-				//row.push_back(new Player(Vector2(xPosition, yPosition), this));
-				//player = dynamic_cast<Player*>(row.back());
+				goals.push_back(goal);
 			}
 			else {
 				row.push_back(nullptr); // 빈 공간
@@ -73,6 +66,16 @@ GameLevel::GameLevel(const std::string& fileName, int startX, int startY, int wi
 	mapHeight = static_cast<int>(mapData.size());
 	mapWidth = mapData.empty() ? 0 : static_cast<int>(mapData[0].size());
 
+	// 플레이어 생성 위치 설정
+	float scaleX = static_cast<float>(screenWidth) / mapWidth;
+	float scaleY = static_cast<float>(screenHeight) / mapHeight;
+	int screenHalfX = 350 / 16 / 2;
+	int screenHalfY = 350 / 16 / 2;
+	int mapX = consoleX / (scaleX)+ screenHalfX;
+	int mapY = consoleY / (scaleY)+ screenHalfY;
+
+	player = new Player(Vector2(mapX,mapY),this);
+
     file.close();
 }
 
@@ -81,12 +84,9 @@ void GameLevel::Update(float deltaTime)
 	Super::Update(deltaTime);
 
 	// 플레이어 업데이트
-	if (player)
-	{
-		player->Update(deltaTime);
-	}
+	if (player) player->Update(deltaTime);
 
-	// 게임이 클리어 됐으면 게임 종료 처리
+	// 스테이지 클리어 처리
 	if (isGameClear)
 	{
 		// 타이머 클래스의 객체로 코드 정리
@@ -94,17 +94,23 @@ void GameLevel::Update(float deltaTime)
 		timer.Update(deltaTime);
 		if (!timer.IsTimeOut()) return;
 
+		if(stageNum <= 3)
+		{
+			Engine::Get().LoadLevel(new ClearLevel(stageNum, score)); // 새로운 레벨 로드
+			score = 0;
+		}
+
 		// 커서 이동
 		//Engine::Get().SetCursorPosition(0, Engine::Get().ScreenSize().y);
 
 		// 메세지 출력
-		Log("Game Clear!\n");
+		//Log("Game Clear!\n");
 
 		// 쓰레드 정지
-		Sleep(2000);
+		//Sleep(2000);
 
 		// 게임 종료 처리
-		Engine::Get().QuitGame();
+		//Engine::Get().QuitGame();
 	}
 
 }
@@ -131,9 +137,8 @@ void GameLevel::Draw()
 			if(actor)
 			{
 				if(actor->Position() == player->Position())
-				{ 
-					//player->SetPosition(Vector2(x,y));
-					//player->Draw();
+				{
+					Engine::Get().Draw(Vector2(x,y),player->GetSymbol(),player->GetColor());
 					continue;
 				}
 				bool shouldDraw = true;
@@ -145,23 +150,16 @@ void GameLevel::Draw()
 			}
 		}
 	}
-
-
-	//// 플레이어 위치 중앙에 고정
-	//if (player)
-	//{
-	//	int playerX = consoleWidth / 2;
-	//	int playerY = consoleHeight / 2;
-	//	player->SetPosition(Vector2(playerX, playerY));
-	//	player->Draw();
-	//}
-
 }
 
 bool GameLevel::CanPlayerMove(const Vector2& position)
 {
 	// 게임이 클리어된 경우 바로 종료
-	if (isGameClear) return false;
+	if(CheckGameClear())
+	{
+		isGameClear = true;
+		return false;
+	}
 
 	int x = static_cast<int>(position.x);
 	int y = static_cast<int>(position.y);
@@ -175,6 +173,13 @@ bool GameLevel::CanPlayerMove(const Vector2& position)
 	if(dynamic_cast<Wall*>(targetActor)) return false;
 
 	if(dynamic_cast<Ground*>(targetActor) || dynamic_cast<Goal*>(targetActor)) return true;
+
+	if(dynamic_cast<Seed*>(targetActor))
+	{
+		targetActor->Destroy();
+		++score;
+		return true;
+	}
 
 	return false;
 }
@@ -196,7 +201,15 @@ void GameLevel::MoveConsole(int dx, int dy)
 	MoveWindow(consoleWindow,consoleX,consoleY,consoleWidth,consoleHeight,TRUE);
 }
 
-void GameLevel::SetConsoleWindow(int x,int y,int width,int height)
+bool GameLevel::CheckGameClear()
+{
+	for(auto* goal : goals)
+	{
+		return player->Position() == goal->Position() ? true : false;
+	}
+}
+
+/*void GameLevel::SetConsoleWindow(int x,int y,int width,int height)
 {
 	HWND consoleWindow = GetConsoleWindow();
 	if(consoleWindow == NULL) return;
@@ -269,4 +282,4 @@ void GameLevel::SetConsoleWindow(int x,int y,int width,int height)
 
 	// 콘솔 크기 변경
 	//Engine::Get().ResizeConsole(x,y,width,height);
-}
+}*/

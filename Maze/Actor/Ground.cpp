@@ -1,11 +1,11 @@
 #include "Ground.h"
 
 Ground::Ground(const Vector2& position)
-	:DrawableActor(".")
+	:DrawableActor(" ")
 {
-	// À§Ä¡ ¼³Á¤
+	// ìœ„ì¹˜ ì„¤ì •
 	this->position = position;
 
-	// »ö»ó ÁöÁ¤
-	color = Color::Blue;
+	// ìƒ‰ìƒ ì§€ì •
+	color = Color::White;
 }

@@ -53,23 +53,27 @@ void Game::LoadStage(int stageNumber)
 
 	switch (stageNumber) {
 	case 1:
-		SetConsoleWindow(100,100,350,350);
-		newLevel = new GameLevel("../Assets/Maps/Stage1.txt", 100, 100, 350, 350);
+		SetConsoleWindow(0,630,350,350);
+		newLevel = new GameLevel(stageNumber, "../Assets/Maps/Stage1.txt", 0, 630, 350, 350);
 		break;
 	case 2:
 		SetConsoleWindow(200,200,350,350);
-		newLevel = new GameLevel("../Assets/Maps/Stage2.txt", 200, 200, 350, 350);
+		newLevel = new GameLevel(stageNumber,"../Assets/Maps/Stage2.txt", 200, 200, 350, 350);
 		break;
 	case 3:
-		SetConsoleWindow(0,630,350,350);
-		newLevel = new GameLevel("../Assets/Maps/Stage3.txt", 0, 630, 350, 350);
+		SetConsoleWindow(100,100,350,350);
+		newLevel = new GameLevel(stageNumber,"../Assets/Maps/Stage3.txt", 100,100, 350, 350);
 		break;
 	default:
 		return;
 	}
 
 	Engine::Get().LoadLevel(newLevel); // 새로운 레벨 로드
+}
 
+void Game::LoadClear(int stageNumber)
+{
+	Level* newLevel = nullptr;
 }
 
 void Game::SetConsoleWindow(int x,int y,int width,int height)

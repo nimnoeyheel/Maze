@@ -17,7 +17,7 @@ class GameLevel : public Level
 	RTTI_DECLARATIONS(GameLevel, Level)
 
 public:
-	GameLevel(const std::string& fileName, int startX, int startY, int width = 350, int height = 350);
+	GameLevel(int stageNum, const std::string& fileName, int startX, int startY, int width = 350, int height = 350);
 
 	// 업데이트 함수
 	virtual void Update(float deltaTime) override;
@@ -32,18 +32,20 @@ public:
 	void MoveConsole(int dx,int dy);
 
 	// 콘솔창 위치 및 크기 설정 함수
-	void SetConsoleWindow(int x,int y,int width,int height);
+	//void SetConsoleWindow(int x,int y,int width,int height);
 
-private:
+	// 게임 클리어 확인 함수
+	bool CheckGameClear();
 
 	int mapWidth;  // 맵 너비
 	int mapHeight; // 맵 높이
-
-	HWND console;  // 콘솔 핸들
 	int consoleX;  // 콘솔 X 좌표
 	int consoleY;  // 콘솔 Y 좌표
 	int consoleWidth;  // 콘솔 너비
 	int consoleHeight; // 콘솔 높이
+
+private:
+	HWND console;  // 콘솔 핸들
 
 	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
 	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
@@ -51,12 +53,17 @@ private:
 	// 액터 데이터를 저장하는 2D 컨테이너
 	std::vector<std::vector<Actor*>> mapData;
 
-	std::vector<DrawableActor*> map;
-	Goal* goal;
+	//std::vector<DrawableActor*> map;
+	//std::vector<Wall*> walls;
+	//std::vector<Ground*> grounds;
+	std::vector<Goal*> goals;
 	Player* player = nullptr;
 
 	// 게임 클리어 변수
 	bool isGameClear = false;
+
+	int stageNum;
+	int score = 0;
 
 };
 

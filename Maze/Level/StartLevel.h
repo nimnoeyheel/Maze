@@ -1,8 +1,7 @@
 #pragma once
 
 #include "Level/Level.h"
-#include "Container/List.h"
-#include <windows.h>
+#include <vector>
 
 struct MenuItem
 {
@@ -42,6 +41,6 @@ private:
 	Color selectedColor = Color::Green;
 	Color unselectedColor = Color::White;
 
-	List<MenuItem*> menuItems;
+	std::vector<MenuItem*> menuItems;
 	int length = 0;
 };

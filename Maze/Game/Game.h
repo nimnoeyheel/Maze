@@ -12,6 +12,8 @@ public:
 
 	void LoadStage(int stageNumber);
 
+	void LoadClear(int stageNumber);
+
 	static Game& Get() { return *instance; }
 
 	void SetConsoleWindow(int x,int y,int width,int height);

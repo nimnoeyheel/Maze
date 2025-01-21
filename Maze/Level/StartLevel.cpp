@@ -1,13 +1,13 @@
 #include "StartLevel.h"
+#include "Engine/Engine.h"
 #include "Level/GameLevel.h"
 #include "Game/Game.h"
-#include "Engine/Engine.h"
 
 StartLevel::StartLevel()
 {
-	menuItems.PushBack(new MenuItem("Start Game", []() { Game::Get().LoadStage(3); }));
-	menuItems.PushBack(new MenuItem("Quit Game", []() { Game::Get().QuitGame(); }));
-	length = menuItems.Size();
+	menuItems.push_back(new MenuItem("Start Game",[]() { Game::Get().LoadStage(1); }));
+	menuItems.push_back(new MenuItem("Quit Game",[]() { Game::Get().QuitGame(); }));
+	length = menuItems.size();
 }
 
 StartLevel::~StartLevel()
@@ -20,11 +20,6 @@ StartLevel::~StartLevel()
 
 void StartLevel::Update(float deltaTime)
 {
-	/*if (Game::Get().GetKeyDown(VK_ESCAPE))
-	{
-		Game::Get().ToggleMenu();
-	}*/
-
 	if (Game::Get().GetKeyDown(VK_UP))
 	{
 		currentIndex = (currentIndex - 1 + length) % length;

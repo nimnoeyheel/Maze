@@ -30,28 +30,38 @@ void Player::Update(float deltaTime)
 	if (Engine::Get().GetKey(VK_LEFT))
 	{
 		direction = Vector2(-1, 0);
-		//refLevel->MoveConsole(-5, 0);
 	}
 	if (Engine::Get().GetKey(VK_RIGHT))
 	{
 		direction = Vector2(1, 0);
-		//refLevel->MoveConsole(5,0);
 	}
 	if (Engine::Get().GetKey(VK_UP))
 	{
 		direction = Vector2(0,-1);
-		//refLevel->MoveConsole(0, -5);
 	}
 	if (Engine::Get().GetKey(VK_DOWN))
 	{
 		direction = Vector2(0, 1);
-		//refLevel->MoveConsole(0, 5);
 	}
 
 	// 이동 방향이 설정되었으면 이동 처리
-	if(direction != 0)
+	if(direction != Vector2(0,0))
 	{
-		Vector2 newPosition = position + direction;
+		int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+		int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+
+		float scaleX = static_cast<float>(screenWidth) / refLevel->mapWidth;
+		float scaleY = static_cast<float>(screenHeight) / refLevel->mapHeight;
+
+		int screenHalfX = 350 / 16 / 2;
+		int screenHalfY = 350 / 16 / 2;
+
+		int mapX = refLevel->consoleX / (scaleX) + screenHalfX;
+		int mapY = refLevel->consoleY / (scaleY) + screenHalfY;
+
+		Vector2 newPosition = Vector2(mapX,mapY) + direction;
+		//Vector2 newPosition = position + direction;
+		
 		if(refLevel->CanPlayerMove(newPosition))
 		{
 			SetPosition(newPosition);
