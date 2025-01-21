@@ -280,7 +280,7 @@ void Engine::Draw()
 void Engine::Present()
 {
 	// Swap Buffer.
-	SetConsoleActiveScreenBuffer(GetRenderer()->buffer);
+	SetConsoleActiveScreenBuffer(GetRenderer()->buffer); //@Todo : 렌더의 버퍼 값을 InitializeConsole() 내부에 있는 버퍼랑 동기화 필요할 듯 
 	currentRenderTargetIndex = 1 - currentRenderTargetIndex;
 }
 
