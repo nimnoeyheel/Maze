@@ -1,5 +1,6 @@
 ﻿#include "GameLevel.h"
 #include "ClearLevel.h"
+#include "FailedLevel.h"
 
 #include "Engine/Engine.h"
 #include "Engine/Timer.h"
@@ -10,12 +11,13 @@
 #include "Actor/Wall.h"
 #include "Actor/Ground.h"
 #include "Actor/Seed.h"
+#include "Actor/Projectile.h"
 
 #include <string>
 #include <fstream>
 #include <algorithm>
 
-GameLevel::GameLevel(int stageNum, const std::string& fileName, int startX, int startY, int width, int height)
+GameLevel::GameLevel(int stageNum,const std::string& fileName,int startX,int startY,int width,int height)
 	: stageNum(stageNum),consoleX(startX),consoleY(startY),consoleWidth(width),consoleHeight(height)
 {
 	// 커서 감추기
@@ -23,7 +25,7 @@ GameLevel::GameLevel(int stageNum, const std::string& fileName, int startX, int 
 
 	// 맵 파일 읽기
 	std::ifstream file(fileName);
-	if (!file.is_open())
+	if(!file.is_open())
 	{
 		std::cerr << "Failed to open map file: " << fileName << std::endl;
 		__debugbreak();
@@ -33,37 +35,32 @@ GameLevel::GameLevel(int stageNum, const std::string& fileName, int startX, int 
 	std::string line;
 
 	// 파일 줄 단위로 읽기
-	while (std::getline(file, line))
+	while(std::getline(file,line))
 	{
 		std::vector<Actor*> row; // 각 줄의 액터 저장
-		for (int xPosition = 0; xPosition < static_cast<int>(line.size()); ++xPosition)
+		for(int xPosition = 0; xPosition < static_cast<int>(line.size()); ++xPosition)
 		{
 			char mapChar = line[xPosition];
 
 			// 문자에 따라 액터 생성
-			if (mapChar == '1') {
+			if(mapChar == '1') {
 				Wall* wall = new Wall(Vector2(xPosition,yPosition));
 				row.push_back(wall);
-			}
-			else if (mapChar == '.') {
+			} else if(mapChar == '.') {
 				Ground* ground = new Ground(Vector2(xPosition,yPosition));
 				row.push_back(ground);
-			}
-			else if(mapChar == 'S') {
+			} else if(mapChar == 'S') {
 				Seed* seed = new Seed(Vector2(xPosition,yPosition));
 				row.push_back(seed);
-			}
-			else if(mapChar == 'E') {
-				Enemy* enemy = new Enemy(Vector2(xPosition,yPosition), this);
+			} else if(mapChar == 'E') {
+				Enemy* enemy = new Enemy(Vector2(xPosition,yPosition),this);
 				row.push_back(enemy);
 				enemies.push_back(enemy);
-			}
-			else if (mapChar == 'G') {
+			} else if(mapChar == 'G') {
 				Goal* goal = new Goal(Vector2(xPosition,yPosition));
 				row.push_back(goal);
 				goals.push_back(goal);
-			}
-			else {
+			} else {
 				row.push_back(nullptr); // 빈 공간
 			}
 		}
@@ -80,14 +77,13 @@ GameLevel::GameLevel(int stageNum, const std::string& fileName, int startX, int 
 	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 	float scaleX = static_cast<float>(screenWidth) / mapWidth;
 	float scaleY = static_cast<float>(screenHeight) / mapHeight;
-	float HalfX = 350 / 16 / 2;
-	float HalfY = 350 / 16 / 2;
-	float mapX = consoleX / scaleX + HalfX;
-	float mapY = consoleY / scaleY + HalfY;
+	float Half = 350 / 16 / 2;
+	float mapX = consoleX / scaleX + Half;
+	float mapY = consoleY / scaleY + Half;
 
 	player = new Player(Vector2(static_cast<int>(mapX),static_cast<int>(mapY)),this);
 
-    file.close();
+	file.close();
 }
 
 void GameLevel::Update(float deltaTime)
@@ -95,28 +91,34 @@ void GameLevel::Update(float deltaTime)
 	Super::Update(deltaTime);
 
 	// 플레이어 업데이트
-	if (player) player->Update(deltaTime);
-	
-	// 에너미 업데이트
-	for(auto* enemy : enemies)
-	{
-		if(enemy) enemy->Update(deltaTime);
-	}
+	if(player) player->Update(deltaTime);
 
-	playTime += deltaTime;
+	timeLimit -= deltaTime;
 
 	// 스테이지 클리어 처리
-	if (isGameClear)
+	if(isGameClear)
 	{
 		// 타이머 클래스의 객체로 코드 정리
 		static Timer timer(0.1);
 		timer.Update(deltaTime);
-		if (!timer.IsTimeOut()) return;
+		if(!timer.IsTimeOut()) return;
 
 		if(stageNum <= 3)
 		{
+			int totalScore = player->GetHP() + player->GetSeeds() + player->GetTakeEnemy() + static_cast<int>(timeLimit);
+
 			// 클리어 레벨 로드
-			Engine::Get().LoadLevel(new ClearLevel(stageNum, player->GetHP() , static_cast<int>(playTime)));
+			Engine::Get().LoadLevel(new ClearLevel(stageNum,totalScore,static_cast<int>(60-timeLimit)));
+		}
+	}
+
+	// 게임 오버 처리
+	if(isGameOver)
+	{
+		if(stageNum <= 3)
+		{
+			// 실패 레벨 로드
+			Engine::Get().LoadLevel(new FailedLevel(stageNum));
 		}
 	}
 }
@@ -127,19 +129,67 @@ void GameLevel::Draw()
 	float scaleX = static_cast<float>(GetSystemMetrics(SM_CXSCREEN)) / mapWidth;
 	float scaleY = static_cast<float>(GetSystemMetrics(SM_CYSCREEN)) / mapHeight;
 
+	// 적 이동 및 mapData 업데이트
+	for(auto* enemy : enemies)
+	{
+		if(!enemy) continue;
+
+		// 적의 현재 위치
+		Vector2 currentPos = enemy->Position();
+		Vector2 newPos = currentPos;
+
+		// 적의 방향에 따라 이동하려는 위치 계산
+		switch(enemy->GetDirection())
+		{
+		case Enemy::Direction::Up:
+			newPos.y -= 1;
+			break;
+		case Enemy::Direction::Down:
+			newPos.y += 1;
+			break;
+		case Enemy::Direction::Left:
+			newPos.x -= 1;
+			break;
+		case Enemy::Direction::Right:
+			newPos.x += 1;
+			break;
+		default:
+			break;
+		}
+
+		// 맵 범위 확인
+		if(newPos.x < 0 || newPos.y < 0 || newPos.x >= mapWidth || newPos.y >= mapHeight)
+			continue;
+
+		// 이동하려는 위치의 Actor 확인
+		Actor* targetActor = mapData[newPos.y][newPos.x];
+		if(dynamic_cast<Ground*>(targetActor))
+		{
+			// 현재 위치와 새 위치의 Actor를 Swap
+			std::swap(mapData[currentPos.y][currentPos.x],mapData[newPos.y][newPos.x]);
+
+			// 적의 위치 갱신
+			enemy->SetPosition(newPos);
+		} else
+		{
+			// 이동할 수 없으면 방향을 반대로 변경
+			enemy->ReverseDirection();
+		}
+	}
+
 	// 화면에 보일 부분만 백 버퍼에 렌더링
-	for (int y = 0; y < consoleHeight; ++y)
+	for(int y = 0; y < consoleHeight; ++y)
 	{
 		float mapY = consoleY / (scaleY)+ y; // 맵의 Y 좌표 계산
-		if (static_cast<int>(mapY)< 0 || static_cast<int>(mapY) >= mapHeight) continue;  // mapData 범위 초과 시 무시
+		if(static_cast<int>(mapY)< 0 || static_cast<int>(mapY) >= mapHeight) continue;  // mapData 범위 초과 시 무시
 
-		for (int x = 0; x < consoleWidth; ++x)
+		for(int x = 0; x < consoleWidth; ++x)
 		{
 			float mapX = consoleX / (scaleX)+ x ; // 맵의 X 좌표 계산
-			if (static_cast<int>(mapX) < 0 || static_cast<int>(mapX) >= mapWidth) continue;  // mapData 범위 초과 시 무시
+			if(static_cast<int>(mapX) < 0 || static_cast<int>(mapX) >= mapWidth) continue;  // mapData 범위 초과 시 무시
 
 			// 맵 데이터에서 Actor 가져오기
-			DrawableActor* actor = dynamic_cast<DrawableActor*>(mapData[mapY][mapX]);
+			DrawableActor* actor = dynamic_cast<DrawableActor*>(mapData[static_cast<int>(mapY)][static_cast<int>(mapX)]);
 			if(actor)
 			{
 				if(actor->Position() == player->Position())
@@ -148,41 +198,59 @@ void GameLevel::Draw()
 					continue;
 				}
 
-				for(auto* enemy : enemies)
-				{
-					if(actor->Position() == enemy->Position())
-					{
-						//Engine::Get().Draw(Vector2(enemy->Position().x,enemy->Position().y),enemy->GetSymbol(),enemy->GetColor());
-						continue;
-					}
-				}
-
 				bool shouldDraw = true;
 				if(shouldDraw)
 				{
-					// Actor의 심볼과 색상을 백 버퍼에 쓰기
 					Engine::Get().Draw(Vector2(x,y),actor->GetSymbol(),actor->GetColor());
+				}
+			}
+
+			// 발사체 그리기
+			for(auto* projectile : player->GetProjectiles())
+			{
+				if(Vector2(static_cast<int>(mapX),static_cast<int>(mapY)) == projectile->Position())
+				{
+					Engine::Get().Draw(Vector2(x,y),projectile->GetSymbol(),projectile->GetColor());
 				}
 			}
 		}
 	}
 
-	for(auto* enemy : enemies)
+	// 텍스트 출력 시작 위치
+	int startX = 0,startY = 0;
+
+	// Life, Seeds, Time 출력
+	int totalSeconds = timeLimit;
+	int minutes = totalSeconds / 60;
+	int seconds = totalSeconds % 60;
+	std::string time = "Time : ";
+	std::string life = "Life : " + std::to_string(player->GetHP());
+	std::string seeds = "Seeds : " + std::to_string(player->GetSeeds());
+	std::string enemies = "Enemies : " + std::to_string(player->GetTakeEnemy());
+
+	if(minutes > 0)
 	{
-		if(enemy)
-		{
-			Engine::Get().Draw(Vector2(enemy->Position().x,enemy->Position().y),enemy->GetSymbol(),enemy->GetColor());
-		}
+		time += std::to_string(minutes) + "min " + std::to_string(seconds) + "sec";
+	} else
+	{
+		time += std::to_string(seconds) + "sec";
 	}
+
+	Engine::Get().Draw(Vector2(startX,startY),life.c_str(),Color::Aqua);
+	Engine::Get().Draw(Vector2(startX,startY+1),seeds.c_str(),Color::Aqua);
+	Engine::Get().Draw(Vector2(startX,startY+2),enemies.c_str(),Color::Aqua);
+	Engine::Get().Draw(Vector2(startX,startY+3),time.c_str(),Color::Aqua);
+
 }
 
 bool GameLevel::CanPlayerMove(const Vector2& position)
 {
-	// 게임이 클리어된 경우 바로 종료
+	// 게임이 클리어 또는 오버된 경우 바로 종료
 	if(CheckGameClear()) return false;
+	if(CheckGameOver()) return false;
 
-	int x = static_cast<int>(position.x);
-	int y = static_cast<int>(position.y);
+	int x = position.x;
+	int y = position.y;
 
 	if(x<0 || y<0 || y >=mapHeight || x>= mapWidth) return false;
 
@@ -193,6 +261,11 @@ bool GameLevel::CanPlayerMove(const Vector2& position)
 	if(dynamic_cast<Wall*>(targetActor)) return false;
 
 	if(dynamic_cast<Ground*>(targetActor) || dynamic_cast<Goal*>(targetActor)) return true;
+
+	if(dynamic_cast<Enemy*>(targetActor))
+	{
+		player->TakeDamage();
+	}
 
 	if(dynamic_cast<Seed*>(targetActor))
 	{
@@ -216,21 +289,23 @@ bool GameLevel::CanPlayerMove(const Vector2& position)
 
 bool GameLevel::CanEnemyMove(const Vector2 & position)
 {
-	// 게임이 클리어된 경우 바로 종료
+	// 게임이 클리어 또는 오버된 경우 바로 종료
 	if(CheckGameClear()) return false;
+	if(CheckGameOver()) return false;
 
-	int x = static_cast<int>(position.x);
-	int y = static_cast<int>(position.y);
+	int x = position.x;
+	int y = position.y;
 
 	if(x<0 || y<0 || y >=mapHeight || x>= mapWidth) return false;
 
 	Actor* targetActor = mapData[y][x];
 
-	if(!targetActor) return true;
+	if(dynamic_cast<Wall*>(targetActor))
+	{
+		return false;
+	}
 
-	if(dynamic_cast<Wall*>(targetActor)) return false;
-
-	if(player->Position() == targetActor->Position()
+	if(dynamic_cast<Player*>(targetActor)
 		|| dynamic_cast<Goal*>(targetActor)
 		|| dynamic_cast<Seed*>(targetActor)
 		|| dynamic_cast<Ground*>(targetActor)) return true;
@@ -238,13 +313,53 @@ bool GameLevel::CanEnemyMove(const Vector2 & position)
 	return false;
 }
 
-void GameLevel::MoveConsole(int dx, int dy)
+bool GameLevel::EnemyOverlapWall(const Vector2 & position)
+{
+	int x = position.x;
+	int y = position.y;
+
+	Actor* targetActor = mapData[y][x];
+
+	if(dynamic_cast<Wall*>(targetActor))
+	{
+		return true;
+	}
+
+	return false;
+}
+
+bool GameLevel::CheckGameClear()
+{
+	for(auto* goal : goals)
+	{
+		if(player->Position() == goal->Position())
+		{
+			isGameClear = true;
+			return true;
+		}
+	}
+	
+	return false;
+}
+
+bool GameLevel::CheckGameOver()
+{
+	if(player->GetHP() <= 0 || timeLimit <= 0)
+	{
+		isGameOver = true;
+		return true;
+	}
+
+	return false;
+}
+
+void GameLevel::MoveConsole(int dx,int dy)
 {
 	consoleX += dx;
 	consoleY += dy;
 
-	if (consoleX < 0) consoleX = 0;
-	if (consoleY < 0) consoleY = 0;
+	if(consoleX < 0) consoleX = 0;
+	if(consoleY < 0) consoleY = 0;
 
 	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
 	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
@@ -257,94 +372,3 @@ void GameLevel::MoveConsole(int dx, int dy)
 	if(consoleWindow == NULL) return;
 	MoveWindow(consoleWindow,consoleX,consoleY,consoleWidth,consoleHeight,TRUE);
 }
-
-bool GameLevel::CheckGameClear()
-{
-	for(auto* goal : goals)
-	{
-		if(player->Position() == goal->Position())
-		{
-			isGameClear = true;
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-}
-
-/*void GameLevel::SetConsoleWindow(int x,int y,int width,int height)
-{
-	HWND consoleWindow = GetConsoleWindow();
-	if(consoleWindow == NULL) return;
-	
-	// 콘솔 폰트 크기 재설정으로 시작
-	CONSOLE_FONT_INFOEX cfi;
-	cfi.cbSize = sizeof(cfi);
-	cfi.nFont = 0;
-	cfi.dwFontSize.X = 8;
-	cfi.dwFontSize.Y = 16;
-	cfi.FontFamily = FF_DONTCARE;
-	cfi.FontWeight = FW_NORMAL;
-	wcscpy_s(cfi.FaceName,L"Terminal");
-	SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE),FALSE,&cfi);
-
-	// 버퍼 크기 계산
-	int bufferWidth = width / cfi.dwFontSize.X;
-	int bufferHeight = height / cfi.dwFontSize.Y;
-
-	// screenSize 업데이트
-	Engine::Get().ScreenSize() = Vector2(bufferWidth,bufferHeight);
-
-	// 버퍼 크기 설정
-	COORD bufferSize = {(SHORT)bufferWidth,(SHORT)bufferHeight};
-	SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE),bufferSize);
-
-	// 창 크기 설정 - 버퍼와 동일하게
-	SMALL_RECT windowRect = {0,0,(SHORT)bufferWidth - 1,(SHORT)bufferHeight - 1};
-	SetConsoleWindowInfo(GetStdHandle(STD_OUTPUT_HANDLE),TRUE,&windowRect);
-
-	// 창 크기 및 위치 설정 - 실제 픽셀 크기로
-	Sleep(50);  // 잠시 대기하여 이전 설정이 적용되도록 함
-
-	// 실제 창 크기를 설정할 때는 윈도우 테두리 등을 고려
-	RECT rect;
-	GetWindowRect(consoleWindow,&rect);
-	int borderWidth = GetSystemMetrics(SM_CXFRAME) * 2;
-	int borderHeight = GetSystemMetrics(SM_CYFRAME) * 2 + GetSystemMetrics(SM_CYCAPTION);
-	int actualWidth = width + borderWidth;
-	int actualHeight = height + borderHeight;
-
-	MoveWindow(consoleWindow,x,y,actualWidth,actualHeight,TRUE);
-	Sleep(50);  // 설정이 안정화될 시간을 줌
-	
-	//HWND consoleWindow = GetConsoleWindow();
-	//if(consoleWindow == NULL) return;
-
-	//// screenSize 업데이트
-	//Vector2 newScreenSize(width / 8,height / 16);
-	//Engine::Get().ScreenSize() = newScreenSize;
-
-	//// 버퍼 크기를 새로운 창 크기와 일치시킴
-	//COORD bufferSize = {(SHORT)newScreenSize.x,(SHORT)newScreenSize.y};
-	//SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE),bufferSize);
-
-	//// 창 크기도 동일하게 설정
-	//SMALL_RECT windowRect = {0,0,(SHORT)newScreenSize.x - 1,(SHORT)newScreenSize.y - 1};
-	//SetConsoleWindowInfo(GetStdHandle(STD_OUTPUT_HANDLE),TRUE,&windowRect);
-
-	//// Sleep을 추가하여 콘솔 설정이 안정화될 시간을 줌
-	//Sleep(100);
-	//MoveWindow(consoleWindow,x,y,width,height,TRUE);
-	//Sleep(100);
-
-	// 엔진의 screenSize도 함께 업데이트
-	//Engine::Get().ScreenSize() = Vector2(width/8,height/16);
-
-	// 버퍼 재초기화
-	//Engine::Get().InitializeScreenBuffers();
-
-	// 콘솔 크기 변경
-	//Engine::Get().ResizeConsole(x,y,width,height);
-}*/

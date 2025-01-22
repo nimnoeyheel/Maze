@@ -1,10 +1,10 @@
-#pragma once
+ï»¿#pragma once
 
 #include "Level/Level.h"
 #include "Actor/DrawableActor.h"
 #include <vector>
 
-#pragma region Å¬·¡½º Àü¹æ¼±¾ğ
+#pragma region í´ë˜ìŠ¤ ì „ë°©ì„ ì–¸
 class Enemy;
 class Goal;
 class Player;
@@ -17,46 +17,51 @@ class GameLevel : public Level
 public:
 	GameLevel(int stageNum, const std::string& fileName, int startX, int startY, int width = 350, int height = 350);
 
-	// ¾÷µ¥ÀÌÆ® ÇÔ¼ö
+	// ì—…ë°ì´íŠ¸ í•¨ìˆ˜
 	virtual void Update(float deltaTime) override;
 
-	// ·¹º§ÀÇ ±×¸®±â ÇÔ¼ö
+	// ë ˆë²¨ì˜ ê·¸ë¦¬ê¸° í•¨ìˆ˜
 	virtual void Draw() override;
 
-	// ÇÃ·¹ÀÌ¾î°¡ ÀÌµ¿ÀÌ °¡´ÉÇÑÁö È®ÀÎÇÏ´Â ÇÔ¼ö
+	// í”Œë ˆì´ì–´ê°€ ì´ë™ì´ ê°€ëŠ¥í•œì§€ í™•ì¸í•˜ëŠ” í•¨ìˆ˜
 	bool CanPlayerMove(const Vector2& position);
 
-	// ¿¡³Ê¹Ì°¡ ÀÌµ¿ÀÌ °¡´ÉÇÑÁö È®ÀÎÇÏ´Â ÇÔ¼ö
+	// ì—ë„ˆë¯¸ê°€ ì´ë™ì´ ê°€ëŠ¥í•œì§€ í™•ì¸í•˜ëŠ” í•¨ìˆ˜
 	bool CanEnemyMove(const Vector2& position);
 
-	// ÄÜ¼ÖÃ¢ ÀÌµ¿ ÇÔ¼ö
-	void MoveConsole(int dx,int dy);
+	// ì—ë„ˆë¯¸ê°€ ë²½ì— ë¶€ë”ªí˜”ëŠ”ì§€ í™•ì¸í•˜ëŠ” í•¨ìˆ˜
+	bool EnemyOverlapWall(const Vector2& position);
 
-	// ÄÜ¼ÖÃ¢ À§Ä¡ ¹× Å©±â ¼³Á¤ ÇÔ¼ö
-	//void SetConsoleWindow(int x,int y,int width,int height);
-
-	// °ÔÀÓ Å¬¸®¾î È®ÀÎ ÇÔ¼ö
+	// ê²Œì„ í´ë¦¬ì–´ í™•ì¸ í•¨ìˆ˜
 	bool CheckGameClear();
 
-	int mapWidth;  // ¸Ê ³Êºñ
-	int mapHeight; // ¸Ê ³ôÀÌ
-	int consoleX;  // ÄÜ¼Ö X ÁÂÇ¥
-	int consoleY;  // ÄÜ¼Ö Y ÁÂÇ¥
-	int consoleWidth;  // ÄÜ¼Ö ³Êºñ
-	int consoleHeight; // ÄÜ¼Ö ³ôÀÌ
+	// ê²Œì„ ì˜¤ë²„ í™•ì¸ í•¨ìˆ˜
+	bool CheckGameOver();
 
-private:
-	HWND console;  // ÄÜ¼Ö ÇÚµé
+	// ì½˜ì†”ì°½ ì´ë™ í•¨ìˆ˜
+	void MoveConsole(int dx,int dy);
+
+	int mapWidth;  // ë§µ ë„ˆë¹„
+	int mapHeight; // ë§µ ë†’ì´
+	int consoleX;  // ì½˜ì†” X ì¢Œí‘œ
+	int consoleY;  // ì½˜ì†” Y ì¢Œí‘œ
+	int consoleWidth;  // ì½˜ì†” ë„ˆë¹„
+	int consoleHeight; // ì½˜ì†” ë†’ì´
 
 	std::vector<std::vector<Actor*>> mapData;
 	std::vector<Enemy*> enemies;
+
+private:
+	HWND console;  // ì½˜ì†” í•¸ë“¤
+
 	std::vector<Goal*> goals;
 	Player* player = nullptr;
 
-	// °ÔÀÓ Å¬¸®¾î º¯¼ö
+	// ê²Œì„ í´ë¦¬ì–´, ì˜¤ë²„ ë³€ìˆ˜
 	bool isGameClear = false;
+	bool isGameOver = false;
 
 	int stageNum;
-	float playTime = 0;
+	float timeLimit = 60;
 };
 

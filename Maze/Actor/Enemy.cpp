@@ -26,8 +26,8 @@ Enemy::Enemy(const Vector2 & position, GameLevel* level)
 void Enemy::Update(float deltaTime)
 {
 	Super::Update(deltaTime);
-
-	Vector2 newPosition = position;
+	
+	/*Vector2 newPosition = position;
 
 	// 현재 방향에 따라 이동
 	switch(direction)
@@ -48,18 +48,15 @@ void Enemy::Update(float deltaTime)
 		break;
 	}
 
-	// 벽 콜리전 체크
+	// 이동 가능한 경우에만 위치 변경
 	if(refLevel && refLevel->CanEnemyMove(newPosition))
 	{
-		position = newPosition;
-		//SetPosition(newPosition);
-	}
-	else
+		SetPosition(newPosition);
+	} else
 	{
-		// 벽에 부딪히면 반대 방향으로 변경
+		// 이동 불가 시 : 벽에 부딪히면 반대 방향으로 변경
 		ReverseDirection();
-	}
-
+	}*/
 }
 
 void Enemy::ReverseDirection()

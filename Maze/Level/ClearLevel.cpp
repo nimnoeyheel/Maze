@@ -9,8 +9,17 @@ ClearLevel::ClearLevel(int _stageNum, int _score, int _playTime)
 	: stageNum(_stageNum), score(_score), playTime(_playTime)
 {
 	//menuItems.push_back(new MenuItem("Next Stage",this,&ClearLevel::LoadNextStage,stageNum));
-	menuItems.push_back(new MenuItem("Next Stage", [](int number) { Game::Get().LoadStage(++number); }, stageNum));
-	menuItems.push_back(new MenuItem("Quit Game",+[](int) { Game::Get().QuitGame(); },0));
+
+	if(stageNum < 3)
+	{
+		menuItems.push_back(new MenuItem("Next Stage",[](int number) { Game::Get().LoadStage(++number); },stageNum));
+		menuItems.push_back(new MenuItem("Quit Game",+[](int) { Game::Get().QuitGame(); },0));
+
+	}
+	else
+	{
+		menuItems.push_back(new MenuItem("Quit Game",+[](int) { Game::Get().QuitGame(); },0));
+	}
 
 	length = menuItems.size();
 }
@@ -53,7 +62,7 @@ void ClearLevel::Draw()
 	Engine::Get().Draw(Vector2(startX,startY),clearLog.c_str(),unselectedColor);
 
 	// 스코어 로그
-	std::string scoreLog = "Score : " + std::to_string(score);
+	std::string scoreLog = "Total Score : " + std::to_string(score);
 	Engine::Get().Draw(Vector2(startX,startY + 2),scoreLog.c_str(),Color::White);
 
 	// 플레이 타임 로그
@@ -78,14 +87,4 @@ void ClearLevel::Draw()
 		Color textColor = (i == currentIndex) ? selectedColor : unselectedColor;
 		Engine::Get().Draw(Vector2(startX,startY + i + 5),menuItems[i]->menuText,textColor);
 	}
-}
-
-void ClearLevel::LoadNextStage(int stageNum)
-{
-	Game::Get().LoadStage(++stageNum);
-}
-
-void ClearLevel::QuitGame(int)
-{
-	Game::Get().QuitGame();
 }

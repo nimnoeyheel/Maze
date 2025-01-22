@@ -194,6 +194,7 @@
     <ClCompile Include="Actor\Ground.cpp" />
     <ClCompile Include="Actor\Goal.cpp" />
     <ClCompile Include="Actor\Enemy.cpp" />
+    <ClCompile Include="Level\FailedLevel.cpp" />
     <ClCompile Include="Level\ClearLevel.cpp" />
     <ClCompile Include="Level\GameLevel.cpp" />
     <ClCompile Include="Game\Game.cpp" />
@@ -202,11 +203,13 @@
     <ClCompile Include="Actor\Player.cpp" />
     <ClCompile Include="Actor\Wall.cpp" />
     <ClCompile Include="Actor\Seed.cpp" />
+    <ClCompile Include="Actor\Projectile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor\Ground.h" />
     <ClInclude Include="Actor\Goal.h" />
     <ClInclude Include="Actor\Enemy.h" />
+    <ClInclude Include="Level\FailedLevel.h" />
     <ClInclude Include="Level\ClearLevel.h" />
     <ClInclude Include="Level\GameLevel.h" />
     <ClInclude Include="Game\Game.h" />
@@ -214,6 +217,7 @@
     <ClInclude Include="Actor\Player.h" />
     <ClInclude Include="Actor\Wall.h" />
     <ClInclude Include="Actor\Seed.h" />
+    <ClInclude Include="Actor\Projectile.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

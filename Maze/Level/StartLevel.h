@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Level/Level.h"
 #include <vector>
@@ -16,13 +16,7 @@ struct MenuItem
 		this->onSelected = onSelected;
 	}
 
-	~MenuItem()
-	{
-		//if (menuText)
-		//{
-		//	delete[] menuText;
-		//}
-	}
+	~MenuItem() {}
 
 	char* menuText;
 	OnSelected onSelected;

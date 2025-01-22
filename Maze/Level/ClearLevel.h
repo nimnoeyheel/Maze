@@ -2,7 +2,6 @@
 
 #include "Level/Level.h"
 #include <vector>
-#include <functional>
 
 struct MenuItem
 {
@@ -51,7 +50,7 @@ struct MenuItem
 	int stageNum;
 };
 
-class ClearLevel: public Level, public std::enable_shared_from_this<ClearLevel*>
+class ClearLevel : public Level, public std::enable_shared_from_this<ClearLevel*>
 {
 	RTTI_DECLARATIONS(ClearLevel,Level)
 
@@ -61,9 +60,6 @@ public:
 
 	virtual void Update(float deltaTime) override;
 	virtual void Draw() override;
-
-	void LoadNextStage(int stageNum);
-	void QuitGame(int);
 
 private:
 	int currentIndex = 0;
