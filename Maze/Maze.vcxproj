@@ -193,6 +193,7 @@
   <ItemGroup>
     <ClCompile Include="Actor\Ground.cpp" />
     <ClCompile Include="Actor\Goal.cpp" />
+    <ClCompile Include="Actor\Enemy.cpp" />
     <ClCompile Include="Level\ClearLevel.cpp" />
     <ClCompile Include="Level\GameLevel.cpp" />
     <ClCompile Include="Game\Game.cpp" />
@@ -205,6 +206,7 @@
   <ItemGroup>
     <ClInclude Include="Actor\Ground.h" />
     <ClInclude Include="Actor\Goal.h" />
+    <ClInclude Include="Actor\Enemy.h" />
     <ClInclude Include="Level\ClearLevel.h" />
     <ClInclude Include="Level\GameLevel.h" />
     <ClInclude Include="Game\Game.h" />

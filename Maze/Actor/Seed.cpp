@@ -4,5 +4,5 @@ Seed::Seed(const Vector2& position)
 	: DrawableActor("S")
 {
 	this->position = position;
-	color = Color::White;
+	color = Color::Yellow;
 }

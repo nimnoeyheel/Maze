@@ -53,11 +53,11 @@ void Player::Update(float deltaTime)
 		float scaleX = static_cast<float>(screenWidth) / refLevel->mapWidth;
 		float scaleY = static_cast<float>(screenHeight) / refLevel->mapHeight;
 
-		int screenHalfX = 350 / 16 / 2;
-		int screenHalfY = 350 / 16 / 2;
+		float HalfX = 350 / 16 / 2;
+		float HalfY = 350 / 16 / 2;
 
-		int mapX = refLevel->consoleX / (scaleX) + screenHalfX;
-		int mapY = refLevel->consoleY / (scaleY) + screenHalfY;
+		int mapX = refLevel->consoleX / (scaleX) + HalfX;
+		int mapY = refLevel->consoleY / (scaleY) + HalfY;
 
 		Vector2 newPosition = Vector2(mapX,mapY) + direction;
 		//Vector2 newPosition = position + direction;

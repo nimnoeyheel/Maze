@@ -12,7 +12,16 @@ public:
 
 	virtual void Update(float deltaTime) override;
 
+	int GetHP() { return hp; }
+	int GetSeeds() { return seeds; }
+
+	void TakeDamage() { if(hp > 0) --hp; }
+	void TakeSeed() { ++seeds; }
+
 private:
-	// °ÔÀÓ ·¹º§À» ÂüÁ¶ÇÏ´Â º¯¼ö
+	// ê²Œì„ ë ˆë²¨ì„ ì°¸ì¡°í•˜ëŠ” ë³€ìˆ˜
 	GameLevel* refLevel = nullptr;
+	
+	int hp = 3;
+	int seeds = 0;
 };

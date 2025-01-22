@@ -5,9 +5,7 @@
 #include <vector>
 
 #pragma region 클래스 전방선언
-class DrawableActor;
-class Wall;
-class Ground;
+class Enemy;
 class Goal;
 class Player;
 #pragma endregion
@@ -47,15 +45,8 @@ public:
 private:
 	HWND console;  // 콘솔 핸들
 
-	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
-	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
-
-	// 액터 데이터를 저장하는 2D 컨테이너
 	std::vector<std::vector<Actor*>> mapData;
-
-	//std::vector<DrawableActor*> map;
-	//std::vector<Wall*> walls;
-	//std::vector<Ground*> grounds;
+	std::vector<Enemy*> enemies;
 	std::vector<Goal*> goals;
 	Player* player = nullptr;
 
@@ -63,7 +54,6 @@ private:
 	bool isGameClear = false;
 
 	int stageNum;
-	int score = 0;
 	float playTime = 0;
 };
 

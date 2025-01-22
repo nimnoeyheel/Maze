@@ -19,7 +19,7 @@ public:
 	virtual ~Actor();
 
 	// 루프 처리 함수.
-	virtual void Update(float delatTime);
+	virtual void Update(float deltaTime);
 	virtual void Draw();
 
 	// Getter/Setter.
@@ -28,8 +28,7 @@ public:
 
 	inline bool IsAcive() const { return isActive && !isExpired; }
 	inline void SetActive(bool active) { isActive = active; }
-	//inline void Destroy() { isExpired = true; }
-	void Destroy();
+	inline void Destroy() { isExpired = true; }
 
 protected:
 	// 액터의 위치.

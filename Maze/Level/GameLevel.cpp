@@ -1,15 +1,20 @@
 #include "GameLevel.h"
+#include "ClearLevel.h"
+
 #include "Engine/Engine.h"
-#include "Actor/Player.h"
 #include "Engine/Timer.h"
+
+#include "Actor/Player.h"
+#include "Actor/Goal.h"
+#include "Actor/Enemy.h"
 #include "Actor/Wall.h"
 #include "Actor/Ground.h"
-#include "Actor/Goal.h"
+#include "Actor/Seed.h"
+
 #include <string>
 #include <fstream>
 #include <algorithm>
-#include "ClearLevel.h"
-#include "Actor/Seed.h"
+#include <Actor\Enemy.h>
 
 GameLevel::GameLevel(int stageNum, const std::string& fileName, int startX, int startY, int width, int height)
 	: stageNum(stageNum),consoleX(startX),consoleY(startY),consoleWidth(width),consoleHeight(height)
@@ -49,7 +54,12 @@ GameLevel::GameLevel(int stageNum, const std::string& fileName, int startX, int 
 				Seed* seed = new Seed(Vector2(xPosition,yPosition));
 				row.push_back(seed);
 			}
-			else if (mapChar == 'E') {
+			else if(mapChar == 'E') {
+				Enemy* enemy = new Enemy(Vector2(xPosition,yPosition), this);
+				row.push_back(enemy);
+				enemies.push_back(enemy);
+			}
+			else if (mapChar == 'G') {
 				Goal* goal = new Goal(Vector2(xPosition,yPosition));
 				row.push_back(goal);
 				goals.push_back(goal);
@@ -67,6 +77,8 @@ GameLevel::GameLevel(int stageNum, const std::string& fileName, int startX, int 
 	mapWidth = mapData.empty() ? 0 : static_cast<int>(mapData[0].size());
 
 	// 플레이어 생성 위치 설정
+	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 	float scaleX = static_cast<float>(screenWidth) / mapWidth;
 	float scaleY = static_cast<float>(screenHeight) / mapHeight;
 	int HalfX = 350 / 16 / 2;
@@ -85,6 +97,12 @@ void GameLevel::Update(float deltaTime)
 
 	// 플레이어 업데이트
 	if (player) player->Update(deltaTime);
+	
+	// 에너미 업데이트
+	for(auto* enemy : enemies)
+	{
+		if(enemy) enemy->Update(deltaTime);
+	}
 
 	playTime += deltaTime;
 
@@ -99,9 +117,7 @@ void GameLevel::Update(float deltaTime)
 		if(stageNum <= 3)
 		{
 			// 클리어 레벨 로드
-			Engine::Get().LoadLevel(new ClearLevel(stageNum, score, static_cast<int>(playTime)));
-			score = 0;
-			playTime = 0;
+			Engine::Get().LoadLevel(new ClearLevel(stageNum, player->GetHP() , static_cast<int>(playTime)));
 		}
 	}
 }
@@ -109,8 +125,8 @@ void GameLevel::Update(float deltaTime)
 void GameLevel::Draw()
 {
 	// 맵 크기와 스크린 비율 계산
-	float scaleX = static_cast<float>(screenWidth) / mapWidth;
-	float scaleY = static_cast<float>(screenHeight) / mapHeight;
+	float scaleX = static_cast<float>(GetSystemMetrics(SM_CXSCREEN)) / mapWidth;
+	float scaleY = static_cast<float>(GetSystemMetrics(SM_CYSCREEN)) / mapHeight;
 
 	// 화면에 보일 부분만 백 버퍼에 렌더링
 	for (int y = 0; y < consoleHeight; ++y)
@@ -148,7 +164,6 @@ bool GameLevel::CanPlayerMove(const Vector2& position)
 	// 게임이 클리어된 경우 바로 종료
 	if(CheckGameClear())
 	{
-		isGameClear = true;
 		return false;
 	}
 
@@ -181,7 +196,7 @@ bool GameLevel::CanPlayerMove(const Vector2& position)
 
 		// 맵 데이터에서도 제거
 		mapData[y][x] = nullptr;
-		++score;
+		player->TakeSeed();
 		return true;
 	}
 
@@ -196,6 +211,9 @@ void GameLevel::MoveConsole(int dx, int dy)
 	if (consoleX < 0) consoleX = 0;
 	if (consoleY < 0) consoleY = 0;
 
+	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+
 	if(consoleX + consoleWidth > screenWidth) consoleX = screenWidth - consoleWidth;
 	if(consoleY + consoleHeight > screenHeight) consoleY = screenHeight - consoleHeight;
 
@@ -209,7 +227,15 @@ bool GameLevel::CheckGameClear()
 {
 	for(auto* goal : goals)
 	{
-		return player->Position() == goal->Position() ? true : false;
+		if(player->Position() == goal->Position())
+		{
+			isGameClear = true;
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 }
 
