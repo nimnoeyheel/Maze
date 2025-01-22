@@ -1,4 +1,4 @@
-#include "GameLevel.h"
+﻿#include "GameLevel.h"
 #include "ClearLevel.h"
 
 #include "Engine/Engine.h"
@@ -14,7 +14,6 @@
 #include <string>
 #include <fstream>
 #include <algorithm>
-#include <Actor\Enemy.h>
 
 GameLevel::GameLevel(int stageNum, const std::string& fileName, int startX, int startY, int width, int height)
 	: stageNum(stageNum),consoleX(startX),consoleY(startY),consoleWidth(width),consoleHeight(height)
@@ -81,12 +80,12 @@ GameLevel::GameLevel(int stageNum, const std::string& fileName, int startX, int 
 	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 	float scaleX = static_cast<float>(screenWidth) / mapWidth;
 	float scaleY = static_cast<float>(screenHeight) / mapHeight;
-	int HalfX = 350 / 16 / 2;
-	int HalfY = 350 / 16 / 2;
-	int mapX = consoleX / scaleX + HalfX;
-	int mapY = consoleY / scaleY + HalfY;
+	float HalfX = 350 / 16 / 2;
+	float HalfY = 350 / 16 / 2;
+	float mapX = consoleX / scaleX + HalfX;
+	float mapY = consoleY / scaleY + HalfY;
 
-	player = new Player(Vector2(mapX,mapY),this);
+	player = new Player(Vector2(static_cast<int>(mapX),static_cast<int>(mapY)),this);
 
     file.close();
 }
@@ -131,13 +130,13 @@ void GameLevel::Draw()
 	// 화면에 보일 부분만 백 버퍼에 렌더링
 	for (int y = 0; y < consoleHeight; ++y)
 	{
-		int mapY = consoleY / (scaleY) + y; // 맵의 Y 좌표 계산
-		if (mapY < 0 || mapY >= mapHeight) continue;  // mapData 범위 초과 시 무시
+		float mapY = consoleY / (scaleY)+ y; // 맵의 Y 좌표 계산
+		if (static_cast<int>(mapY)< 0 || static_cast<int>(mapY) >= mapHeight) continue;  // mapData 범위 초과 시 무시
 
 		for (int x = 0; x < consoleWidth; ++x)
 		{
-			int mapX = consoleX / (scaleX) + x ; // 맵의 X 좌표 계산
-			if (mapX < 0 || mapX >= mapWidth) continue;  // mapData 범위 초과 시 무시
+			float mapX = consoleX / (scaleX)+ x ; // 맵의 X 좌표 계산
+			if (static_cast<int>(mapX) < 0 || static_cast<int>(mapX) >= mapWidth) continue;  // mapData 범위 초과 시 무시
 
 			// 맵 데이터에서 Actor 가져오기
 			DrawableActor* actor = dynamic_cast<DrawableActor*>(mapData[mapY][mapX]);
@@ -148,6 +147,16 @@ void GameLevel::Draw()
 					Engine::Get().Draw(Vector2(x,y),player->GetSymbol(),player->GetColor());
 					continue;
 				}
+
+				for(auto* enemy : enemies)
+				{
+					if(actor->Position() == enemy->Position())
+					{
+						//Engine::Get().Draw(Vector2(enemy->Position().x,enemy->Position().y),enemy->GetSymbol(),enemy->GetColor());
+						continue;
+					}
+				}
+
 				bool shouldDraw = true;
 				if(shouldDraw)
 				{
@@ -157,15 +166,20 @@ void GameLevel::Draw()
 			}
 		}
 	}
+
+	for(auto* enemy : enemies)
+	{
+		if(enemy)
+		{
+			Engine::Get().Draw(Vector2(enemy->Position().x,enemy->Position().y),enemy->GetSymbol(),enemy->GetColor());
+		}
+	}
 }
 
 bool GameLevel::CanPlayerMove(const Vector2& position)
 {
 	// 게임이 클리어된 경우 바로 종료
-	if(CheckGameClear())
-	{
-		return false;
-	}
+	if(CheckGameClear()) return false;
 
 	int x = static_cast<int>(position.x);
 	int y = static_cast<int>(position.y);
@@ -182,9 +196,6 @@ bool GameLevel::CanPlayerMove(const Vector2& position)
 
 	if(dynamic_cast<Seed*>(targetActor))
 	{
-		//Engine::Get().DestroyActor(targetActor);
-		//targetActor->Destroy();
-
 		// 배열에서 targetActor를 찾아 제거
 		auto it = std::find(actors.begin(),actors.end(),targetActor);
 		if(it != actors.end())
@@ -199,6 +210,30 @@ bool GameLevel::CanPlayerMove(const Vector2& position)
 		player->TakeSeed();
 		return true;
 	}
+
+	return false;
+}
+
+bool GameLevel::CanEnemyMove(const Vector2 & position)
+{
+	// 게임이 클리어된 경우 바로 종료
+	if(CheckGameClear()) return false;
+
+	int x = static_cast<int>(position.x);
+	int y = static_cast<int>(position.y);
+
+	if(x<0 || y<0 || y >=mapHeight || x>= mapWidth) return false;
+
+	Actor* targetActor = mapData[y][x];
+
+	if(!targetActor) return true;
+
+	if(dynamic_cast<Wall*>(targetActor)) return false;
+
+	if(player->Position() == targetActor->Position()
+		|| dynamic_cast<Goal*>(targetActor)
+		|| dynamic_cast<Seed*>(targetActor)
+		|| dynamic_cast<Ground*>(targetActor)) return true;
 
 	return false;
 }

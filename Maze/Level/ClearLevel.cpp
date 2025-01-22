@@ -1,4 +1,4 @@
-#include "ClearLevel.h"
+﻿#include "ClearLevel.h"
 #include "Engine/Engine.h"
 #include "Level/GameLevel.h"
 #include "Game/Game.h"
@@ -8,7 +8,8 @@
 ClearLevel::ClearLevel(int _stageNum, int _score, int _playTime)
 	: stageNum(_stageNum), score(_score), playTime(_playTime)
 {
-	menuItems.push_back(new MenuItem("Next Stage",this,&ClearLevel::LoadNextStage,stageNum));
+	//menuItems.push_back(new MenuItem("Next Stage",this,&ClearLevel::LoadNextStage,stageNum));
+	menuItems.push_back(new MenuItem("Next Stage", [](int number) { Game::Get().LoadStage(++number); }, stageNum));
 	menuItems.push_back(new MenuItem("Quit Game",+[](int) { Game::Get().QuitGame(); },0));
 
 	length = menuItems.size();
@@ -18,10 +19,7 @@ ClearLevel::~ClearLevel()
 {
 	for(auto* item : menuItems)
 	{
-		delete item;if(Game::Get().GetKeyDown(VK_RETURN))
-		{
-			menuItems[currentIndex]->Execute();
-		}
+		delete item;
 	}
 }
 
@@ -55,14 +53,14 @@ void ClearLevel::Draw()
 	Engine::Get().Draw(Vector2(startX,startY),clearLog.c_str(),unselectedColor);
 
 	// 스코어 로그
-	std::string scoreLog = "Score " + std::to_string(score);
+	std::string scoreLog = "Score : " + std::to_string(score);
 	Engine::Get().Draw(Vector2(startX,startY + 2),scoreLog.c_str(),Color::White);
 
 	// 플레이 타임 로그
-	int totalSeconds = static_cast<int>(playTime);
+	int totalSeconds = playTime;
 	int minutes = totalSeconds / 60;
 	int seconds = totalSeconds % 60;
-	std::string playTimeLog = "Play Time ";
+	std::string playTimeLog = "Play Time : ";
 
 	if(minutes > 0)
 	{

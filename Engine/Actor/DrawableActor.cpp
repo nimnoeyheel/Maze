@@ -5,13 +5,13 @@
 DrawableActor::DrawableActor(const char* image)
 	: Actor()/*, image(image)*/
 {
-	// ì „ë‹¬ ë°›ì€ ë¬¸ìžì—´ ë³µì‚¬.
+	// Àü´Þ ¹ÞÀº ¹®ÀÚ¿­ º¹»ç.
 	auto length = strlen(image) + 1;
 	this->image = new char[length];
-	memset(this->image,0,length); // ì´ˆê¸°í™”
+	memset(this->image,0,length); // ÃÊ±âÈ­
 	strcpy_s(this->image, length, image);
 
-	// ë„ˆë¹„ ì„¤ì •.
+	// ³Êºñ ¼³Á¤.
 	width = (int)strlen(image);
 }
 
@@ -30,11 +30,11 @@ void DrawableActor::Draw()
 
 void DrawableActor::SetPosition(const Vector2& newPosition)
 {
-	//// ì´ì „ì˜ ìœ„ì¹˜ë¥¼ ë¨¼ì € ì§€ìš°ê¸°.
+	//// ÀÌÀüÀÇ À§Ä¡¸¦ ¸ÕÀú Áö¿ì±â.
 	//Engine::Get().SetCursorPosition(position);
 	//Log(" ");
 
-	// ìœ„ì¹˜ë¥¼ ìƒˆë¡œ ì˜®ê¸°ê¸°.
+	// À§Ä¡¸¦ »õ·Î ¿Å±â±â.
 	Super::SetPosition(newPosition);
 }
 
@@ -42,26 +42,26 @@ bool DrawableActor::Intersect(const DrawableActor& other)
 {
 	// AABB(Axis Aligned Bounding Box).
 
-	// ë‚´ xì¢Œí‘œ ìµœì†Œ/ìµœëŒ€.
+	// ³» xÁÂÇ¥ ÃÖ¼Ò/ÃÖ´ë.
 	int min = position.x;
 	int max = position.x + width;
 
-	// ë‹¤ë¥¸ ì•¡í„°ì˜ xì¢Œí‘œ ìµœì†Œ/ìµœëŒ€.
+	// ´Ù¸¥ ¾×ÅÍÀÇ xÁÂÇ¥ ÃÖ¼Ò/ÃÖ´ë.
 	int otherMin = other.position.x;
 	int otherMax = other.position.x + other.width;
 
-	// ë‹¤ë¥¸ ì•¡í„°ì˜ ì™¼ìª½ ë ìœ„ì¹˜ê°€ ë‚´ ì˜¤ë¥¸ìª½ ë ìœ„ì¹˜ë¥¼ ë²—ì–´ë‚˜ë©´ ì¶©ëŒ ì•ˆí•¨.
+	// ´Ù¸¥ ¾×ÅÍÀÇ ¿ÞÂÊ ³¡ À§Ä¡°¡ ³» ¿À¸¥ÂÊ ³¡ À§Ä¡¸¦ ¹þ¾î³ª¸é Ãæµ¹ ¾ÈÇÔ.
 	if (otherMin > max)
 	{
 		return false;
 	}
 
-	// ë‹¤ë¥¸ ì•¡í„°ì˜ ì˜¤ë¥¸ìª½ ë ìœ„ì¹˜ê°€ ë‚´ ì™¼ìª½ ë ìœ„ì¹˜ë³´ë‹¤ ìž‘ìœ¼ë©´ ì¶©ëŒ ì•ˆí•¨.
+	// ´Ù¸¥ ¾×ÅÍÀÇ ¿À¸¥ÂÊ ³¡ À§Ä¡°¡ ³» ¿ÞÂÊ ³¡ À§Ä¡º¸´Ù ÀÛÀ¸¸é Ãæµ¹ ¾ÈÇÔ.
 	if (otherMax < min)
 	{
 		return false;
 	}
 
-	// ìœ„ì˜ ë‘ ê²½ìš°ê°€ ì•„ë‹ˆë¼ë©´ (xì¢Œí‘œëŠ” ì„œë¡œ ê²¹ì¹¨), yìœ„ì¹˜ ë¹„êµ.
+	// À§ÀÇ µÎ °æ¿ì°¡ ¾Æ´Ï¶ó¸é (xÁÂÇ¥´Â ¼­·Î °ãÄ§), yÀ§Ä¡ ºñ±³.
 	return position.y == other.position.y;
 }

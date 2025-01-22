@@ -1,4 +1,4 @@
-#include "Player.h"
+﻿#include "Player.h"
 #include "Engine/Engine.h"
 #include "Game/Game.h"
 #include "Level/GameLevel.h"
@@ -49,18 +49,14 @@ void Player::Update(float deltaTime)
 	{
 		int screenWidth = GetSystemMetrics(SM_CXSCREEN);
 		int screenHeight = GetSystemMetrics(SM_CYSCREEN);
-
 		float scaleX = static_cast<float>(screenWidth) / refLevel->mapWidth;
 		float scaleY = static_cast<float>(screenHeight) / refLevel->mapHeight;
-
 		float HalfX = 350 / 16 / 2;
 		float HalfY = 350 / 16 / 2;
+		float mapX = refLevel->consoleX / scaleX + HalfX;
+		float mapY = refLevel->consoleY / scaleY + HalfY;
 
-		int mapX = refLevel->consoleX / (scaleX) + HalfX;
-		int mapY = refLevel->consoleY / (scaleY) + HalfY;
-
-		Vector2 newPosition = Vector2(mapX,mapY) + direction;
-		//Vector2 newPosition = position + direction;
+		Vector2 newPosition = Vector2(static_cast<int>(mapX),static_cast<int>(mapY)) + direction;
 		
 		if(refLevel->CanPlayerMove(newPosition))
 		{

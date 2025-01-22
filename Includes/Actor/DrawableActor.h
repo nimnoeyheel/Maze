@@ -14,7 +14,7 @@ public:
 	virtual void Draw() override;
 	virtual void SetPosition(const Vector2& newPosition) override;
 
-	// ì¶©ëŒ í™•ì¸ í•¨ìˆ˜.
+	// Ãæµ¹ È®ÀÎ ÇÔ¼ö.
 	bool Intersect(const DrawableActor& other);
 
 	// Getter.
@@ -24,12 +24,12 @@ public:
 
 protected:
 
-	// í™”ë©´ì— ê·¸ë¦´ ë¬¸ì ê°’.
+	// È­¸é¿¡ ±×¸± ¹®ÀÚ °ª.
 	char* image;
 
-	// ë„ˆë¹„(ë¬¸ìì—´ ê¸¸ì´).
+	// ³Êºñ(¹®ÀÚ¿­ ±æÀÌ).
 	int width = 0;
 
-	// ìƒ‰ìƒ ê°’.
+	// »ö»ó °ª.
 	Color color = Color::White;
 };

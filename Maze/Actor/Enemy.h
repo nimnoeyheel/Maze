@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Actor/DrawableActor.h"
 #include "Level/GameLevel.h"
@@ -36,7 +36,7 @@ private:
 	DirectionGroup directionGroup = DirectionGroup::None;
 	Direction direction = Direction::None;
 
-	float speed = 1;
+	float speed = 5;
 
 	void ReverseDirection();
 };

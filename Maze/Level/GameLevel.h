@@ -4,7 +4,7 @@
 #include "Actor/DrawableActor.h"
 #include <vector>
 
-#pragma region í´ë˜ìŠ¤ ì „ë°©ì„ ì–¸
+#pragma region Å¬·¡½º Àü¹æ¼±¾ğ
 class Enemy;
 class Goal;
 class Player;
@@ -17,40 +17,43 @@ class GameLevel : public Level
 public:
 	GameLevel(int stageNum, const std::string& fileName, int startX, int startY, int width = 350, int height = 350);
 
-	// ì—…ë°ì´íŠ¸ í•¨ìˆ˜
+	// ¾÷µ¥ÀÌÆ® ÇÔ¼ö
 	virtual void Update(float deltaTime) override;
 
-	// ë ˆë²¨ì˜ ê·¸ë¦¬ê¸° í•¨ìˆ˜
+	// ·¹º§ÀÇ ±×¸®±â ÇÔ¼ö
 	virtual void Draw() override;
 
-	// í”Œë ˆì´ì–´ê°€ ì´ë™ì´ ê°€ëŠ¥í•œì§€ í™•ì¸í•˜ëŠ” í•¨ìˆ˜
+	// ÇÃ·¹ÀÌ¾î°¡ ÀÌµ¿ÀÌ °¡´ÉÇÑÁö È®ÀÎÇÏ´Â ÇÔ¼ö
 	bool CanPlayerMove(const Vector2& position);
 
-	// ì½˜ì†”ì°½ ì´ë™ í•¨ìˆ˜
+	// ¿¡³Ê¹Ì°¡ ÀÌµ¿ÀÌ °¡´ÉÇÑÁö È®ÀÎÇÏ´Â ÇÔ¼ö
+	bool CanEnemyMove(const Vector2& position);
+
+	// ÄÜ¼ÖÃ¢ ÀÌµ¿ ÇÔ¼ö
 	void MoveConsole(int dx,int dy);
 
-	// ì½˜ì†”ì°½ ìœ„ì¹˜ ë° í¬ê¸° ì„¤ì • í•¨ìˆ˜
+	// ÄÜ¼ÖÃ¢ À§Ä¡ ¹× Å©±â ¼³Á¤ ÇÔ¼ö
 	//void SetConsoleWindow(int x,int y,int width,int height);
 
-	// ê²Œì„ í´ë¦¬ì–´ í™•ì¸ í•¨ìˆ˜
+	// °ÔÀÓ Å¬¸®¾î È®ÀÎ ÇÔ¼ö
 	bool CheckGameClear();
 
-	int mapWidth;  // ë§µ ë„ˆë¹„
-	int mapHeight; // ë§µ ë†’ì´
-	int consoleX;  // ì½˜ì†” X ì¢Œí‘œ
-	int consoleY;  // ì½˜ì†” Y ì¢Œí‘œ
-	int consoleWidth;  // ì½˜ì†” ë„ˆë¹„
-	int consoleHeight; // ì½˜ì†” ë†’ì´
+	int mapWidth;  // ¸Ê ³Êºñ
+	int mapHeight; // ¸Ê ³ôÀÌ
+	int consoleX;  // ÄÜ¼Ö X ÁÂÇ¥
+	int consoleY;  // ÄÜ¼Ö Y ÁÂÇ¥
+	int consoleWidth;  // ÄÜ¼Ö ³Êºñ
+	int consoleHeight; // ÄÜ¼Ö ³ôÀÌ
 
 private:
-	HWND console;  // ì½˜ì†” í•¸ë“¤
+	HWND console;  // ÄÜ¼Ö ÇÚµé
 
 	std::vector<std::vector<Actor*>> mapData;
 	std::vector<Enemy*> enemies;
 	std::vector<Goal*> goals;
 	Player* player = nullptr;
 
-	// ê²Œì„ í´ë¦¬ì–´ ë³€ìˆ˜
+	// °ÔÀÓ Å¬¸®¾î º¯¼ö
 	bool isGameClear = false;
 
 	int stageNum;

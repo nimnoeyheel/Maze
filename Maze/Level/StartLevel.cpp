@@ -1,21 +1,27 @@
-#include "StartLevel.h"
+﻿#include "StartLevel.h"
 #include "Engine/Engine.h"
 #include "Level/GameLevel.h"
 #include "Game/Game.h"
 
 StartLevel::StartLevel()
 {
-	menuItems.push_back(new MenuItem("Start Game",[]() { Game::Get().LoadStage(1); }));
+	menuItems.push_back(new MenuItem("Start Game", []() { Game::Get().LoadStage(1); }));
 	menuItems.push_back(new MenuItem("Quit Game",[]() { Game::Get().QuitGame(); }));
 	length = menuItems.size();
 }
 
 StartLevel::~StartLevel()
 {
-	for (auto* item : menuItems)
+	while (!menuItems.empty())
 	{
-		delete item;
+		delete menuItems[0];
+		menuItems.erase(menuItems.begin());
 	}
+
+	//for (auto* item : menuItems)
+	//{
+	//	delete item;
+	//}
 }
 
 void StartLevel::Update(float deltaTime)

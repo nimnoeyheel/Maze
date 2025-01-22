@@ -18,7 +18,10 @@ struct MenuItem
 
 	~MenuItem()
 	{
-		delete[] menuText;
+		//if (menuText)
+		//{
+		//	delete[] menuText;
+		//}
 	}
 
 	char* menuText;

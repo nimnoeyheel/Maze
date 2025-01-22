@@ -1,4 +1,4 @@
-#include "Enemy.h"
+﻿#include "Enemy.h"
 #include "Level/GameLevel.h"
 #include <cstdlib>
 
@@ -33,26 +33,26 @@ void Enemy::Update(float deltaTime)
 	switch(direction)
 	{
 	case Enemy::Direction::Up:
-		newPosition.y -= speed * deltaTime;
+		newPosition.y -= speed;
 		break;
 	case Enemy::Direction::Down:
-		newPosition.y += speed * deltaTime;
+		newPosition.y += speed;
 		break;
 	case Enemy::Direction::Left:
-		newPosition.x -= speed * deltaTime;
+		newPosition.x -= speed;
 		break;
 	case Enemy::Direction::Right:
-		newPosition.x += speed * deltaTime;
+		newPosition.x += speed;
 		break;
 	default:
 		break;
 	}
 
 	// 벽 콜리전 체크
-	if(refLevel && refLevel->CanPlayerMove(newPosition))
+	if(refLevel && refLevel->CanEnemyMove(newPosition))
 	{
-		//position = newPosition;
-		SetPosition(newPosition);
+		position = newPosition;
+		//SetPosition(newPosition);
 	}
 	else
 	{
