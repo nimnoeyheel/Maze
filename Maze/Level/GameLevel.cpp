@@ -77,9 +77,10 @@ GameLevel::GameLevel(int stageNum,const std::string& fileName,int startX,int sta
 	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 	float scaleX = static_cast<float>(screenWidth) / mapWidth;
 	float scaleY = static_cast<float>(screenHeight) / mapHeight;
-	float Half = 350 / 16 / 2;
-	float mapX = consoleX / scaleX + Half;
-	float mapY = consoleY / scaleY + Half;
+	float HalfX = 350 / 12 / 2;
+	float HalfY = 350 / 20 / 2;
+	float mapX = consoleX / scaleX + HalfX;
+	float mapY = consoleY / scaleY + HalfY;
 
 	player = new Player(Vector2(static_cast<int>(mapX),static_cast<int>(mapY)),this);
 
@@ -192,16 +193,11 @@ void GameLevel::Draw()
 			DrawableActor* actor = dynamic_cast<DrawableActor*>(mapData[static_cast<int>(mapY)][static_cast<int>(mapX)]);
 			if(actor)
 			{
+				Engine::Get().Draw(Vector2(x,y),actor->GetSymbol(),actor->GetColor());
+
 				if(actor->Position() == player->Position())
 				{
 					Engine::Get().Draw(Vector2(x,y),player->GetSymbol(),player->GetColor());
-					continue;
-				}
-
-				bool shouldDraw = true;
-				if(shouldDraw)
-				{
-					Engine::Get().Draw(Vector2(x,y),actor->GetSymbol(),actor->GetColor());
 				}
 			}
 

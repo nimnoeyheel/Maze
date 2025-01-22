@@ -69,9 +69,10 @@ void Player::Update(float deltaTime)
 		int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 		float scaleX = static_cast<float>(screenWidth) / refLevel->mapWidth;
 		float scaleY = static_cast<float>(screenHeight) / refLevel->mapHeight;
-		float Half = 350 / 16 / 2;
-		float mapX = refLevel->consoleX / scaleX + Half;
-		float mapY = refLevel->consoleY / scaleY + Half;
+		float HalfX = 350 / 12 / 2;
+		float HalfY = 350 / 20 / 2;
+		float mapX = refLevel->consoleX / scaleX + HalfX;
+		float mapY = refLevel->consoleY / scaleY + HalfY;
 
 		Vector2 newPosition = Vector2(static_cast<int>(mapX),static_cast<int>(mapY)) + direction;
 		
