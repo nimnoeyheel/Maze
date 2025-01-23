@@ -1,19 +1,19 @@
-#pragma once
+ï»¿#pragma once
 
 #include "Core.h"
 #include "Math/Vector2.h"
 
-// ÀÔ·Â Ã³¸®¸¦ À§ÇÑ ±¸Á¶Ã¼.
+// ì…ë ¥ ì²˜ë¦¬ë¥¼ ìœ„í•œ êµ¬ì¡°ì²´.
 struct KeyState
 {
-	// ÇöÀç ÇÁ·¹ÀÓ¿¡ Å°°¡ ´­·È´ÂÁö È®ÀÎ.
+	// í˜„ì¬ í”„ë ˆì„ì— í‚¤ê°€ ëˆŒë ¸ëŠ”ì§€ í™•ì¸.
 	bool isKeyDown = false;
 
-	// ÀÌÀü ÇÁ·¹ÀÓ¿¡ Å°°¡ ´­·È¾ú´ÂÁö È®ÀÎ.
+	// ì´ì „ í”„ë ˆì„ì— í‚¤ê°€ ëˆŒë ¸ì—ˆëŠ”ì§€ í™•ì¸.
 	bool wasKeyDown = false;
 };
 
-// ¿£Áø Å¬·¡½º.
+// ì—”ì§„ í´ë˜ìŠ¤.
 class Level;
 class Actor;
 class ScreenBuffer;
@@ -23,52 +23,52 @@ public:
 	Engine();
 	virtual ~Engine();
 
-	// ¿£Áø ½ÇÇà ÇÔ¼ö.
+	// ì—”ì§„ ì‹¤í–‰ í•¨ìˆ˜.
 	void Run();
 
-	// ·¹º§ Ãß°¡ ÇÔ¼ö.
+	// ë ˆë²¨ ì¶”ê°€ í•¨ìˆ˜.
 	void LoadLevel(Level* newLevel);
 
-	// ¾×ÅÍ Ãß°¡/»èÁ¦ ÇÔ¼ö.
+	// ì•¡í„° ì¶”ê°€/ì‚­ì œ í•¨ìˆ˜.
 	void AddActor(Actor* newActor);
 	void DestroyActor(Actor* targetActor);
 
-	// È­¸é ÁÂÇ¥ °ü·Ã ÇÔ¼ö.
+	// í™”ë©´ ì¢Œí‘œ ê´€ë ¨ í•¨ìˆ˜.
 	void SetCursorType(CursorType cursorType);
 	//void SetCursorPosition(const Vector2& position);
 	//void SetCursorPosition(int x, int y);
 
 	void Draw(const Vector2& position, const char* image, Color color = Color::White);
 
-	// È­¸é Å©±â ¹İÈ¯ ÇÔ¼ö.
+	// í™”ë©´ í¬ê¸° ë°˜í™˜ í•¨ìˆ˜.
 	inline Vector2 ScreenSize() const { return screenSize; }
 
-	// Å¸°Ù ÇÁ·¹ÀÓ ¼Óµµ ¼³Á¤ ÇÔ¼ö.
+	// íƒ€ê²Ÿ í”„ë ˆì„ ì†ë„ ì„¤ì • í•¨ìˆ˜.
 	void SetTargetFrameRate(float targetFrameRate);
 
-	// ÀÔ·Â °ü·Ã ÇÔ¼ö.
+	// ì…ë ¥ ê´€ë ¨ í•¨ìˆ˜.
 	bool GetKey(int key);
 	bool GetKeyDown(int key);
 	bool GetKeyUp(int key);
 
-	// ¿£Áø Á¾·á ÇÔ¼ö.
+	// ì—”ì§„ ì¢…ë£Œ í•¨ìˆ˜.
 	void QuitGame();
 
-	// ½Ì±ÛÅæ °´Ã¼ Á¢±Ù ÇÔ¼ö.
+	// ì‹±ê¸€í†¤ ê°ì²´ ì ‘ê·¼ í•¨ìˆ˜.
 	static Engine& Get();
 
-	// ¹öÆÛ ÃÊ±âÈ­ ÇÔ¼ö.
+	// ë²„í¼ ì´ˆê¸°í™” í•¨ìˆ˜.
 	void InitializeScreenBuffers();
 
 protected:
-	void ProcessInput();				// ÀÔ·Â Ã³¸®.
+	void ProcessInput();				// ì…ë ¥ ì²˜ë¦¬.
 	void Update(float deltaTime);		// Tick();
 
-	void Clear();						// È­¸é Áö¿ì±â.
+	void Clear();						// í™”ë©´ ì§€ìš°ê¸°.
 	void Draw();						// Render();
 	void Present();
 
-	// ÀÌÀü ÇÁ·¹ÀÓÀÇ Å° »óÅÂ¸¦ ÀúÀåÇÏ´Â ÇÔ¼ö.
+	// ì´ì „ í”„ë ˆì„ì˜ í‚¤ ìƒíƒœë¥¼ ì €ì¥í•˜ëŠ” í•¨ìˆ˜.
 	void SavePreviouseKeyStates();
 
 	inline ScreenBuffer* GetRenderer() const { return renderTargets[currentRenderTargetIndex]; }
@@ -78,34 +78,37 @@ protected:
 
 protected:
 
-	// Å¸°Ù ÇÁ·¹ÀÓ º¯¼ö(ÃÊ´ç ÇÁ·¹ÀÓ).
+	// íƒ€ê²Ÿ í”„ë ˆì„ ë³€ìˆ˜(ì´ˆë‹¹ í”„ë ˆì„).
 	float targetFrameRate = 60.0f;
 
-	// ÇÑ ÇÁ·¹ÀÓ ½Ã°£ °ª(´ÜÀ§: ÃÊ).
+	// í•œ í”„ë ˆì„ ì‹œê°„ ê°’(ë‹¨ìœ„: ì´ˆ).
 	float targetOneFrameTime = 0.0f;
 
-	// Á¾·áÇÒ ¶§ ¼³Á¤ÇÒ º¯¼ö.
+	// ì¢…ë£Œí•  ë•Œ ì„¤ì •í•  ë³€ìˆ˜.
 	bool quit;
 
-	// Å° »óÅÂ¸¦ ÀúÀåÇÏ´Â ¹è¿­.
+	// í‚¤ ìƒíƒœë¥¼ ì €ì¥í•˜ëŠ” ë°°ì—´.
 	KeyState keyState[255];
 
-	// ½Ì±ÛÅæ ±¸ÇöÀ» À§ÇÑ Àü¿ª º¯¼ö ¼±¾ğ.
+	// ì‹±ê¸€í†¤ êµ¬í˜„ì„ ìœ„í•œ ì „ì—­ ë³€ìˆ˜ ì„ ì–¸.
 	static Engine* instance;
 
-	// ¸ŞÀÎ ·¹º§ º¯¼ö.
+	// ë©”ì¸ ë ˆë²¨ ë³€ìˆ˜.
 	Level* mainLevel;
 
-	// ÇÁ·¹ÀÓÀ» ¾÷µ¥ÀÌÆ®ÇØ¾ß ÇÏ´ÂÁö ¿©ºÎ¸¦ ³ªÅ¸³»´Â º¯¼ö.
+	// í”„ë ˆì„ì„ ì—…ë°ì´íŠ¸í•´ì•¼ í•˜ëŠ”ì§€ ì—¬ë¶€ë¥¼ ë‚˜íƒ€ë‚´ëŠ” ë³€ìˆ˜.
 	bool shouldUpdate = true;
 
-	// È­¸é Å©±â.
+	// í™”ë©´ í¬ê¸°.
 	Vector2 screenSize;
 
-	// È­¸é Áö¿ï ¶§ »ç¿ëÇÒ ¹öÆÛ(Buffer/Blob).
+	// í™”ë©´ ì§€ìš¸ ë•Œ ì‚¬ìš©í•  ë²„í¼(Buffer/Blob).
 	CHAR_INFO* imageBuffer = nullptr;
 
-	// È­¸é ¹öÆÛ.
+	// í™”ë©´ ë²„í¼.
 	ScreenBuffer* renderTargets[2];
 	int currentRenderTargetIndex = 0;
+
+	// ë²„í¼ ìŠ¤ì™‘ í•„ìš” ì—¬ë¶€ë¥¼ ì œì–´í•˜ëŠ” í”Œë˜ê·¸
+	bool shouldPresent = false;
 };

@@ -53,16 +53,19 @@ void Game::LoadStage(int stageNumber)
 
 	switch (stageNumber) {
 	case 1:
-		SetConsoleWindow(0,630,350,350);
-		newLevel = new GameLevel(stageNumber, "../Assets/Maps/Stage1.txt", 0, 630, 350, 350);
+		newLevel = new  GameLevel(stageNumber, "../Assets/Maps/Stage1.txt", 0, 650, 350, 350);
+		//Engine::Get().ScreenSize() = Vector2(newLevel->GetBufferWidth(),newLevel->GetBufferHeight());
+		SetConsoleWindow(0,650,350,350);
 		break;
 	case 2:
-		SetConsoleWindow(1570,175,350,350);
 		newLevel = new GameLevel(stageNumber,"../Assets/Maps/Stage2.txt",1570, 175, 350, 350);
+		//Engine::Get().ScreenSize() = Vector2(newLevel->GetBufferWidth(),newLevel->GetBufferHeight());
+		SetConsoleWindow(1570,175,350,350);
 		break;
 	case 3:
-		SetConsoleWindow(700,0,350,350);
 		newLevel = new GameLevel(stageNumber,"../Assets/Maps/Stage3.txt",700, 0, 350, 350);
+		//Engine::Get().ScreenSize() = Vector2(newLevel->GetBufferWidth(),newLevel->GetBufferHeight());
+		SetConsoleWindow(700,0,350,350);
 		break;
 	default:
 		return;

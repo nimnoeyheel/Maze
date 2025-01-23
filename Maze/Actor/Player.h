@@ -22,7 +22,7 @@ public:
 	void TakeSeed() { ++seeds; }
 	void TakeEnemise() { ++takeEnemies; }
 
-	const std::vector<Projectile*>& GetProjectiles() const { return projectiles; }
+	std::vector<Projectile*>& GetProjectiles() { return projectiles; }
 
 private:
 	// 게임 레벨을 참조하는 변수

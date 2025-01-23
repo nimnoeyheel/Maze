@@ -58,7 +58,7 @@ void ClearLevel::Draw()
 	int startX = 0,startY = 0;
 
 	// 클리어 스테이지 로그
-	std::string clearLog = "Clear Stage " + std::to_string(stageNum);
+	std::string clearLog = "Stage " + std::to_string(stageNum) + " Clear!";
 	Engine::Get().Draw(Vector2(startX,startY),clearLog.c_str(),unselectedColor);
 
 	// 스코어 로그

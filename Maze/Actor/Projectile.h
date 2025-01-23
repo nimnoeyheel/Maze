@@ -15,7 +15,7 @@ public:
 	float GetStartTime() const { return startTime; }
 
 private:
-	float lifetime = 2.0f; // 기본 수명
+	float lifetime = 0.2f; // 기본 수명
 	float startTime = 0.0f; // 발사 시작 시간
 };
 

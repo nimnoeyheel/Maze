@@ -49,7 +49,7 @@ void StartLevel::Draw()
 	int startX = 0,startY = 0;
 
 	// "Escape The Maze" 헤더 출력
-	Engine::Get().Draw(Vector2(startX,startY),"Escape The Maze",unselectedColor);
+	Engine::Get().Draw(Vector2(startX,startY),"Escape The Window",unselectedColor);
 
 	// 메뉴 항목 출력
 	for(int ix = 0; ix < length; ++ix) {

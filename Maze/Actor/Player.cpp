@@ -88,8 +88,8 @@ void Player::Attack()
 {
 	Vector2 projectilePos = position;
 
-	float timeInterval = 0.2f; // 각 발사체 발사 간격
-	float currentTime = 0.0f;
+	//float timeInterval = 1.0f; // 각 발사체 발사 간격
+	//float currentTime = 0.0f;
 
 	for(int i = 1; i <= 10; i++)
 	{
@@ -97,12 +97,12 @@ void Player::Attack()
 		Projectile* projectile = new Projectile(projectilePos);
 
 		// 발사체에 초기 시간 설정
-		projectile->SetStartTime(currentTime);
+		//projectile->SetStartTime(currentTime);
 		
 		projectiles.push_back(projectile);
 
 		// 다음 발사체 발사 시점
-		currentTime += timeInterval;
+		//currentTime += timeInterval;
 	}
 }
 

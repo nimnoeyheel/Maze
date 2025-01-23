@@ -126,7 +126,7 @@ void GameLevel::Update(float deltaTime)
 
 void GameLevel::Draw()
 {
-	// 맵 크기와 스크린 비율 계산
+	//// 맵 크기와 스크린 비율 계산
 	float scaleX = static_cast<float>(GetSystemMetrics(SM_CXSCREEN)) / mapWidth;
 	float scaleY = static_cast<float>(GetSystemMetrics(SM_CYSCREEN)) / mapHeight;
 
@@ -181,12 +181,12 @@ void GameLevel::Draw()
 	// 화면에 보일 부분만 백 버퍼에 렌더링
 	for(int y = 0; y < consoleHeight; ++y)
 	{
-		float mapY = consoleY / (scaleY)+ y; // 맵의 Y 좌표 계산
+		float mapY = consoleY / scaleY + y; // 맵의 Y 좌표 계산
 		if(static_cast<int>(mapY)< 0 || static_cast<int>(mapY) >= mapHeight) continue;  // mapData 범위 초과 시 무시
 
 		for(int x = 0; x < consoleWidth; ++x)
 		{
-			float mapX = consoleX / (scaleX)+ x ; // 맵의 X 좌표 계산
+			float mapX = consoleX / scaleX + x ; // 맵의 X 좌표 계산
 			if(static_cast<int>(mapX) < 0 || static_cast<int>(mapX) >= mapWidth) continue;  // mapData 범위 초과 시 무시
 
 			// 맵 데이터에서 Actor 가져오기
@@ -195,14 +195,51 @@ void GameLevel::Draw()
 			{
 				Engine::Get().Draw(Vector2(x,y),actor->GetSymbol(),actor->GetColor());
 
-				// 발사체 그리기
-				for(auto* projectile : player->GetProjectiles())
+				auto& projectiles = player->GetProjectiles();
+						projectiles.erase(std::remove_if(projectiles.begin(),projectiles.end(),[&](Projectile* projectile)
+						{
+							if(dynamic_cast<Wall*>(actor) && actor->Position() == projectile->Position())
+							{
+								delete projectile;
+								return true;
+							}
+							return false;
+						}),
+			projectiles.end()
+						);
+
+				/*for(auto it = projectiles.begin(); it != projectiles.end();)
 				{
+					if(dynamic_cast<Wall*>(actor) && actor->Position() == (*it)->Position())
+					{
+						// Wall에 충돌한 발사체 제거
+						delete *it;
+						it = projectiles.erase(it);
+						break;
+					}
+
+					if(!dynamic_cast<Seed*>(actor) && !dynamic_cast<Wall*>(actor) && actor->Position() == (*it)->Position())
+					{
+						Engine::Get().Draw(Vector2(x,y),(*it)->GetSymbol(),(*it)->GetColor());
+						++it;
+					} else
+					{
+						++it;
+					}
+				}*/
+
+				/*for(auto* projectile : player->GetProjectiles())
+				{
+					if(dynamic_cast<Wall*>(actor) && actor->Position() == projectile->Position())
+					{
+						break;
+					}
+					
 					if(!dynamic_cast<Seed*>(actor) && !dynamic_cast<Wall*>(actor) && actor->Position() == projectile->Position())
 					{
 						Engine::Get().Draw(Vector2(x,y),projectile->GetSymbol(),projectile->GetColor());
 					}
-				}
+				}*/
 
 				if(actor->Position() == player->Position())
 				{

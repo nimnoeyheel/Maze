@@ -144,6 +144,13 @@ void Engine::Run()
 				mainLevel->ProcessAddedAndDestroyedActor();
 			}
 
+			// 버퍼 스왑이 필요한 경우에만 Present() 호출
+			if(shouldPresent)
+			{
+				Present();
+				shouldPresent = false;
+			}
+
 			// 프레임 활성화.
 			shouldUpdate = true;
 		}
@@ -153,9 +160,28 @@ void Engine::Run()
 void Engine::LoadLevel(Level* newLevel)
 {
 	// 기존 레벨이 있다면 삭제 후 교체.
-
 	// 메인 레벨 설정.
 	mainLevel = newLevel;
+
+	//// 새로운 레벨의 버퍼 크기에 맞춰 화면 버퍼 초기화
+	//if(mainLevel)
+	//{
+	//	// 레벨에서 설정된 화면 크기로 버퍼 재초기화
+	//	screenSize.x = mainLevel->GetBufferWidth();
+	//	screenSize.y = mainLevel->GetBufferHeight();
+
+	//	// 기존 이미지 버퍼 삭제
+	//	delete[] imageBuffer;
+
+	//	// 새 버퍼 크기에 맞춰 이미지 버퍼 재할당
+	//	imageBuffer = new CHAR_INFO[(screenSize.x + 1) * screenSize.y + 1];
+	//	ClearImageBuffer();
+
+	//	// 렌더 타겟 버퍼 크기 업데이트
+	//	COORD newSize = {(short)screenSize.x,(short)screenSize.y};
+	//	renderTargets[0]->size = newSize;
+	//	renderTargets[1]->size = newSize;
+	//}
 }
 
 void Engine::AddActor(Actor* newActor)
@@ -273,14 +299,20 @@ void Engine::Draw()
 	// 백버퍼에 데이터 쓰기.
 	GetRenderer()->Draw(imageBuffer);
 
+	// 버퍼 스왑 플래그 설정
+	shouldPresent = true;
+
 	// 프론트<->백 버퍼 교환. //@Todo : 프레임마다 호출해주고 있음 수정 필요
-	Present();
+	//Present();
 }
 
 void Engine::Present()
 {
 	// Swap Buffer.
-	SetConsoleActiveScreenBuffer(GetRenderer()->buffer); //@Todo : 렌더의 버퍼 값을 InitializeConsole() 내부에 있는 버퍼랑 동기화 필요할 듯 
+	//SetConsoleActiveScreenBuffer(GetRenderer()->buffer); //@Todo : 렌더의 버퍼 값을 InitializeConsole() 내부에 있는 버퍼랑 동기화 필요할 듯 
+	
+	SetConsoleActiveScreenBuffer(renderTargets[currentRenderTargetIndex]->buffer);
+
 	currentRenderTargetIndex = 1 - currentRenderTargetIndex;
 }
 

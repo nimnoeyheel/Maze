@@ -27,10 +27,16 @@ public:
 	virtual void Update(float deltaTime);
 	virtual void Draw();
 
+	int GetBufferWidth() const { return bufferWidth; }
+	int GetBufferHeight() const { return bufferHeight; }
+
 protected:
 	// 게임 공간에 배치되는 물체(액터) 배열.
 	std::vector<Actor*> actors;
 
 	// 추가 요청된 액터.
 	Actor* addRequestedActor = nullptr;
+
+	int bufferWidth = 0;
+	int bufferHeight = 0;
 };
