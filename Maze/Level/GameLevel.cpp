@@ -195,20 +195,21 @@ void GameLevel::Draw()
 			{
 				Engine::Get().Draw(Vector2(x,y),actor->GetSymbol(),actor->GetColor());
 
+				// 발사체 그리기
+				for(auto* projectile : player->GetProjectiles())
+				{
+					if(!dynamic_cast<Seed*>(actor) && !dynamic_cast<Wall*>(actor) && actor->Position() == projectile->Position())
+					{
+						Engine::Get().Draw(Vector2(x,y),projectile->GetSymbol(),projectile->GetColor());
+					}
+				}
+
 				if(actor->Position() == player->Position())
 				{
 					Engine::Get().Draw(Vector2(x,y),player->GetSymbol(),player->GetColor());
 				}
 			}
 
-			// 발사체 그리기
-			for(auto* projectile : player->GetProjectiles())
-			{
-				if(Vector2(static_cast<int>(mapX),static_cast<int>(mapY)) == projectile->Position())
-				{
-					Engine::Get().Draw(Vector2(x,y),projectile->GetSymbol(),projectile->GetColor());
-				}
-			}
 		}
 	}
 
