@@ -5,6 +5,7 @@
 #include "Projectile.h"
 #include "Enemy.h"
 #include <vector>
+#include "Ground.h"
 
 Player::Player(const Vector2& position, GameLevel* level)
 	: DrawableActor("P"), refLevel(level)
@@ -108,18 +109,42 @@ void Player::Attack()
 
 void Player::UpdateProjectiles()
 {
+	const float delay = 0.2f;
+
+	//for(size_t i = 0; i < projectiles.size(); ++i)
+	//{
+	//	Projectile* projectile = projectiles[i];
+	//	
+	//	// 발사체의 렌더링 시작 시간을 설정
+	//	if(projectile->GetStartTime() > 0) // 초기값 -1이면 설정
+	//	{
+	//		projectile->SetStartTime(currentTime + i * delay);
+	//	}
+
+	//	// 발사체 업데이트
+	//	bool shouldDestroy = projectile->UpdateProjectile(this->deltaTime,currentTime);
+
+	//	if(shouldDestroy)
+	//	{
+	//		delete projectile;
+	//		projectiles.erase(projectiles.begin()+i);
+	//		--i;
+	//	}
+	//}
+
 	for(auto it = projectiles.begin(); it != projectiles.end();)
 	{
 		Projectile* projectile = *it;
 
-		bool shouldDestroy = projectile->UpdateProjectile(this->deltaTime, currentTime);
 
-		if(shouldDestroy)
+		//bool shouldDestroy = projectile->UpdateProjectile(this->deltaTime, currentTime);
+
+		/*if(shouldDestroy)
 		{
 			delete projectile;
 			it = projectiles.erase(it);
 			continue;
-		}
+		}*/
 
 		Vector2 projectilePos = projectile->Position();
 
@@ -127,10 +152,9 @@ void Player::UpdateProjectiles()
 		bool bIsCollided = false;
 		for(int y = 0; y < refLevel->mapHeight; y++)
 		{
-			for(int x = 0; x < refLevel->mapWidth; x++)
+ 			for(int x = 0; x < refLevel->mapWidth; x++)
 			{
 				Actor* actor = refLevel->mapData[y][x];
-				
 				if(Enemy* enemy = dynamic_cast<Enemy*>(actor))
 				{
 					if(enemy->Position() == projectilePos)
@@ -139,7 +163,6 @@ void Player::UpdateProjectiles()
 						TakeEnemise();
 
 						// Enemy 제거
-						refLevel->mapData[y][x] = nullptr;
 						auto enemyIt = std::find(refLevel->enemies.begin(),refLevel->enemies.end(),enemy);
 						if(enemyIt != refLevel->enemies.end())
 						{
@@ -147,6 +170,12 @@ void Player::UpdateProjectiles()
 							*enemyIt = nullptr;
 							refLevel->enemies.erase(enemyIt);
 						}
+
+						// 맵 데이터에서도 제거하고 새 ground 객체 추가
+						refLevel->mapData[y][x] = nullptr;
+						Ground* ground = new Ground(Vector2(projectilePos.x,projectilePos.y));
+						refLevel->mapData[y][x] = ground;
+						
 						bIsCollided = true;
 						break;
 					}

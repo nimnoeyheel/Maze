@@ -11,11 +11,11 @@ public:
 
 	bool UpdateProjectile(float deltaTime, float currentTime);
 
-	void SetStartTime(float time) { startTime = time; }
 	float GetStartTime() const { return startTime; }
+	void SetStartTime(float time) { startTime = time; }
 
 private:
-	float lifetime = 0.2f; // 기본 수명
-	float startTime = 0.0f; // 발사 시작 시간
+	float lifetime = 0.1f; // 기본 수명
+	float startTime = -1; // 발사 시작 시간
 };
 

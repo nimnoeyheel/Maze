@@ -193,9 +193,11 @@ void GameLevel::Draw()
 			DrawableActor* actor = dynamic_cast<DrawableActor*>(mapData[static_cast<int>(mapY)][static_cast<int>(mapX)]);
 			if(actor)
 			{
+				// 모든 액터 먼저 그리기
 				Engine::Get().Draw(Vector2(x,y),actor->GetSymbol(),actor->GetColor());
-
-				auto& projectiles = player->GetProjectiles();
+				
+				// 플레이어 발사체 그리기
+				/*auto& projectiles = player->GetProjectiles();
 						projectiles.erase(std::remove_if(projectiles.begin(),projectiles.end(),[&](Projectile* projectile)
 						{
 							if(dynamic_cast<Wall*>(actor) && actor->Position() == projectile->Position())
@@ -206,7 +208,7 @@ void GameLevel::Draw()
 							return false;
 						}),
 			projectiles.end()
-						);
+						);*/
 
 				/*for(auto it = projectiles.begin(); it != projectiles.end();)
 				{
@@ -228,19 +230,15 @@ void GameLevel::Draw()
 					}
 				}*/
 
-				/*for(auto* projectile : player->GetProjectiles())
+				for(auto* projectile : player->GetProjectiles())
 				{
-					if(dynamic_cast<Wall*>(actor) && actor->Position() == projectile->Position())
-					{
-						break;
-					}
-					
 					if(!dynamic_cast<Seed*>(actor) && !dynamic_cast<Wall*>(actor) && actor->Position() == projectile->Position())
 					{
 						Engine::Get().Draw(Vector2(x,y),projectile->GetSymbol(),projectile->GetColor());
 					}
-				}*/
+				}
 
+				// 플레이어 그리기
 				if(actor->Position() == player->Position())
 				{
 					Engine::Get().Draw(Vector2(x,y),player->GetSymbol(),player->GetColor());
@@ -314,6 +312,11 @@ bool GameLevel::CanPlayerMove(const Vector2& position)
 
 		// 맵 데이터에서도 제거
 		mapData[y][x] = nullptr;
+
+		// targetActor를 제거한 자리에 Ground 객체 추가.
+		Ground* ground = new Ground(Vector2(targetActor->Position().x,targetActor->Position().y));
+		mapData[y][x] = ground;
+
 		player->TakeSeed();
 		return true;
 	}
