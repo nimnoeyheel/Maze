@@ -109,7 +109,7 @@ void Player::Attack()
 
 void Player::UpdateProjectiles()
 {
-	const float delay = 0.2f;
+	//const float delay = 0.2f;
 
 	//for(size_t i = 0; i < projectiles.size(); ++i)
 	//{
@@ -137,14 +137,14 @@ void Player::UpdateProjectiles()
 		Projectile* projectile = *it;
 
 
-		//bool shouldDestroy = projectile->UpdateProjectile(this->deltaTime, currentTime);
+		bool shouldDestroy = projectile->UpdateProjectile(this->deltaTime, currentTime);
 
-		/*if(shouldDestroy)
+		if(shouldDestroy)
 		{
 			delete projectile;
 			it = projectiles.erase(it);
 			continue;
-		}*/
+		}
 
 		Vector2 projectilePos = projectile->Position();
 
